@@ -48,3 +48,9 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Imp file location's -> 
+
+root/android/app/build/outputs/apk/release/app-release.apk
+root/android/app/build/outputs/bundle/release/app-release.aab
+
