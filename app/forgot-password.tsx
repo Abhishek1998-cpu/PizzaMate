@@ -7,6 +7,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// NOTE: Auth screens are intentionally English-only (not localized).
+
 type ForgotPasswordForm = {
   email: string;
 };

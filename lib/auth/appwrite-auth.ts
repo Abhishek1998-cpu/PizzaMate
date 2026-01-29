@@ -1,6 +1,6 @@
 import * as Linking from 'expo-linking';
 import { ID, Models } from 'appwrite';
-import { appwriteAccount, appwriteClient } from '../appwrite';
+import { appwriteAccount, appwriteClient, getWebRedirectBaseUrl } from '../appwrite';
 import { clearStoredSessionId, storeSessionId } from './session';
 
 export function appwriteErrorMessage(err: unknown) {
@@ -62,7 +62,11 @@ export async function getCurrentUser() {
 }
 
 export async function sendPasswordRecovery(email: string) {
-  const recoveryUrl = Linking.createURL('/reset-password');
+  const base = getWebRedirectBaseUrl();
+  const normalized = typeof base === 'string' ? base.replace(/\/+$/, '') : null;
+  const recoveryUrl = normalized
+    ? `${normalized}/reset-password.html`
+    : Linking.createURL('/reset-password');
   await appwriteAccount.createRecovery(email, recoveryUrl);
 }
 
@@ -80,3 +84,18 @@ export async function confirmPasswordRecovery(params: {
   );
 }
 
+export async function sendEmailVerification() {
+  const base = getWebRedirectBaseUrl();
+  const normalized = typeof base === 'string' ? base.replace(/\/+$/, '') : null;
+  const verifyUrl = normalized
+    ? `${normalized}/verify-email.html`
+    : Linking.createURL('/verify-email');
+  await appwriteAccount.createVerification(verifyUrl);
+}
+
+export async function confirmEmailVerification(params: {
+  userId: string;
+  secret: string;
+}) {
+  await appwriteAccount.updateVerification(params.userId, params.secret);
+}

@@ -51,6 +51,20 @@ Join our community of developers creating universal apps.
 
 ## Imp file location's -> 
 
-root/android/app/build/outputs/apk/release/app-release.apk
-root/android/app/build/outputs/bundle/release/app-release.aab
+- root/android/app/build/outputs/apk/release/app-release.apk
+- root/android/app/build/outputs/bundle/release/app-release.aab
+
+## Pending Items -> 
+
+- Correct App Icon Size - Done
+- i18N - English and Hindi - Done 
+- Dark Mode and Light Mode - Done
+- Profile Icon taking to setting's page - Done
+- Timer completion notification
+- Terms & Conditions Page Web and App - Done
+- Privacy Policy Page Web and App - Done
+- Deep Linking of Forgot Password and Reset Password - Done
+- Pizza Quiz leadership for Daily enrollment
+- Favorite checklist
+- Android Navigation button overlapping issue
 

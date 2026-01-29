@@ -1,26 +1,77 @@
 import { CookingStep, defaultRecipeSlug, recipeBySlug } from "@/data/recipes";
-import { MaterialIcons } from "@expo/vector-icons";
+import { maybeNotifyTimerComplete } from "@/lib/notifications/notifications";
+import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Button, IconButton, ProgressBar, Surface } from "react-native-paper";
+import { useTranslation } from "react-i18next";
+import { AppState, Image, ScrollView, StyleSheet, Text, Vibration, View } from "react-native";
+import { Button, IconButton, ProgressBar, Snackbar, Surface, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+type SpeechModule = {
+  speak: (text: string, options?: { language?: string; rate?: number; pitch?: number }) => void;
+  stop: () => void;
+};
+
+let speechModule: SpeechModule | null | undefined = undefined;
+function getSpeech(): SpeechModule | null {
+  // Cache result so we don't retry every time.
+  if (speechModule !== undefined) return speechModule;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require("expo-speech") as SpeechModule;
+    speechModule = mod;
+    return mod;
+  } catch {
+    speechModule = null;
+    return null;
+  }
+}
+
+function safeSpeechStop() {
+  try {
+    getSpeech()?.stop();
+  } catch {
+    // ignore
+  }
+}
+
+function safeSpeechSpeak(text: string) {
+  try {
+    getSpeech()?.stop();
+    getSpeech()?.speak(text, { language: "en-US", rate: 0.95, pitch: 1.0 });
+  } catch {
+    // ignore
+  }
+}
 
 export default function CookingGuideScreen() {
   const insets = useSafeAreaInsets();
+  const { i18n } = useTranslation();
+  const lang = i18n.language?.startsWith("hi") ? "hi" : "en";
+  const { dark, colors } = useTheme();
   const { recipe: recipeSlug } = useLocalSearchParams<{ recipe?: string }>();
   const steps = recipeBySlug[recipeSlug ?? defaultRecipeSlug]?.steps ?? [];
 
   const [stepIndex, setStepIndex] = useState(0);
   const step: CookingStep = steps[stepIndex];
+  const stepTitle = step.title[lang];
+  const stepSubtitle = step.subtitle[lang];
+  const stepDescription = step.description[lang];
 
   const [remaining, setRemaining] = useState(step.durationSeconds ?? 0);
   const [isRunning, setIsRunning] = useState(false);
+  const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [timerFinished, setTimerFinished] = useState(false);
+  const [snackVisible, setSnackVisible] = useState(false);
 
   // Reset timer when step changes
   useEffect(() => {
     setRemaining(step.durationSeconds ?? 0);
     setIsRunning(false);
+    setTimerFinished(false);
+    setSnackVisible(false);
+    safeSpeechStop();
   }, [stepIndex, step.durationSeconds]);
 
   // Countdown timer
@@ -33,6 +84,43 @@ export default function CookingGuideScreen() {
 
     return () => clearInterval(interval);
   }, [isRunning, remaining, step.durationSeconds]);
+
+  // If user mutes alerts, stop any ongoing speech immediately.
+  useEffect(() => {
+    if (!alertsEnabled) {
+      safeSpeechStop();
+    }
+  }, [alertsEnabled]);
+
+  // Timer completion signal (haptics + vibration + UI)
+  useEffect(() => {
+    if (!step.durationSeconds) return;
+    if (!isRunning) return;
+    if (remaining > 0) return;
+    if (timerFinished) return;
+
+    setIsRunning(false);
+    setTimerFinished(true);
+
+    if (alertsEnabled) {
+      // ~3s vibration pattern
+      Vibration.vibrate([0, 500, 250, 500, 250, 500, 250, 500]);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      safeSpeechSpeak("Timer complete");
+    }
+
+    // If the app is backgrounded, also send a local notification (if enabled).
+    if (AppState.currentState !== "active") {
+      void maybeNotifyTimerComplete({
+        title: "Timer complete!",
+        body: stepTitle,
+      });
+    }
+
+    setSnackVisible(true);
+    const t = setTimeout(() => setSnackVisible(false), 3000);
+    return () => clearTimeout(t);
+  }, [alertsEnabled, isRunning, remaining, step.durationSeconds, timerFinished]);
 
   const progress = useMemo(
     () => (stepIndex + 1) / steps.length,
@@ -49,20 +137,34 @@ export default function CookingGuideScreen() {
       ? 1 - remaining / step.durationSeconds
       : 0;
 
+  const bg = dark ? "#221010" : colors.background;
+  const text = dark ? "#fff" : "#111";
+  const muted = dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)";
+  const panelBg = dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)";
+  const panelBorder = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.10)";
+  const footerBg = dark ? "rgba(34,16,16,0.96)" : "rgba(255,255,255,0.96)";
+
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
       {/* HEADER */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <IconButton
           icon="arrow-left"
-          iconColor="#fff"
+          iconColor={text}
           size={22}
           onPress={() => router.back()}
           style={styles.backIcon}
         />
-        <Text style={styles.headerTitle}>Step {step.subtitle}</Text>
+        <Text style={[styles.headerTitle, { color: text }]}>Step {stepSubtitle}</Text>
         <View style={styles.headerActions}>
-          <MaterialIcons name="volume-up" size={22} color="#fff" />
+          <IconButton
+            icon={alertsEnabled ? "volume-high" : "volume-off"}
+            iconColor={text}
+            size={22}
+            onPress={() => setAlertsEnabled((v) => !v)}
+            style={styles.headerIconButton}
+            accessibilityLabel={alertsEnabled ? "Mute timer alerts" : "Unmute timer alerts"}
+          />
         </View>
       </View>
 
@@ -70,42 +172,57 @@ export default function CookingGuideScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
-            <Text style={styles.stepTitle}>{step.title}</Text>
-            <Text style={styles.progressText}>
+            <Text style={[styles.stepTitle, { color: text }]}>{stepTitle}</Text>
+            <Text style={[styles.progressText, { color: muted }]}>
               {Math.round(progress * 100)}% Complete
             </Text>
           </View>
           <ProgressBar progress={progress} color="#ec1313" />
         </View>
 
-        <Surface style={styles.imageCard}>
+        <Surface style={[styles.imageCard, { borderColor: panelBorder, backgroundColor: panelBg }]}>
           <Image source={{ uri: step.image }} style={styles.image} />
         </Surface>
 
         <View style={styles.textSection}>
-          <Text style={styles.instructionTitle}>{step.title}</Text>
-          <Text style={styles.instructionBody}>{step.description}</Text>
+          <Text style={[styles.instructionTitle, { color: text }]}>{stepTitle}</Text>
+          <Text style={[styles.instructionBody, { color: dark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.70)" }]}>
+            {stepDescription}
+          </Text>
         </View>
 
         {/* TIMER */}
         {step.durationSeconds ? (
           <View style={styles.timerSection}>
-            <View style={styles.timerPanel}>
+            <View
+              style={[
+                styles.timerPanel,
+                { backgroundColor: panelBg, borderColor: panelBorder },
+                timerFinished && { borderColor: "#ec1313", borderWidth: 2 },
+              ]}
+            >
               <ProgressBar
                 progress={ringProgress}
                 color="#ec1313"
-                style={styles.timerBar}
+                style={[
+                  styles.timerBar,
+                  {
+                    backgroundColor: dark ? "#000000" : "rgba(0,0,0,0.06)",
+                    borderColor: dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)",
+                  },
+                ]}
               />
-              <Text style={styles.timerValue}>{remainingLabel}</Text>
-              <Text style={styles.timerLabel}>REMAINING</Text>
+              <Text style={[styles.timerValue, { color: text }]}>{remainingLabel}</Text>
+              <Text style={[styles.timerLabel, { color: muted }]}>REMAINING</Text>
               <View style={styles.timerControlsInline}>
                 <IconButton
                   icon="replay"
                   size={20}
-                  iconColor="#fff"
+                  iconColor={text}
                   onPress={() => {
                     setRemaining(step.durationSeconds ?? 0);
                     setIsRunning(false);
+                    setTimerFinished(false);
                   }}
                   style={styles.timerControlButton}
                 />
@@ -126,11 +243,11 @@ export default function CookingGuideScreen() {
       </ScrollView>
 
       {/* FOOTER */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }, { backgroundColor: footerBg }]}>
         <Button
           mode="contained-tonal"
-          buttonColor="rgba(255,255,255,0.08)"
-          textColor="#fff"
+          buttonColor={dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}
+          textColor={dark ? "#fff" : "#111"}
           icon="chevron-left"
           contentStyle={styles.footerButtonContent}
           labelStyle={styles.footerButtonLabel}
@@ -163,6 +280,20 @@ export default function CookingGuideScreen() {
           Next Step
         </Button>
       </View>
+
+      <Snackbar
+        visible={snackVisible}
+        onDismiss={() => setSnackVisible(false)}
+        duration={3000}
+        style={[styles.snackbar, { marginBottom: 92 + Math.max(insets.bottom, 12) }]}
+        action={{
+          label: "OK",
+          onPress: () => setSnackVisible(false),
+          textColor: "#fff",
+        }}
+      >
+        Timer complete!
+      </Snackbar>
     </View>
   );
 }
@@ -192,6 +323,9 @@ const styles = StyleSheet.create({
   headerActions: {
     width: 64,
     alignItems: "center",
+  },
+  headerIconButton: {
+    margin: 0,
   },
   content: {
     paddingBottom: 140,
@@ -360,5 +494,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     fontFamily: "Inter_700Bold",
+  },
+  snackbar: {
+    backgroundColor: "#ec1313",
+    borderRadius: 12,
+    marginHorizontal: 16,
   },
 });

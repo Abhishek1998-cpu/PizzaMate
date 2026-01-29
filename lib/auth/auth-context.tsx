@@ -4,8 +4,10 @@ import { Models } from 'appwrite';
 import { appwriteClient } from '../appwrite';
 import {
   appwriteErrorMessage,
+  confirmEmailVerification,
   confirmPasswordRecovery,
   getCurrentUser,
+  sendEmailVerification,
   sendPasswordRecovery,
   signInWithEmail,
   signOut,
@@ -24,6 +26,8 @@ type AuthContextValue = {
   signOut: () => Promise<void>;
   sendRecovery: (email: string) => Promise<void>;
   confirmRecovery: (userId: string, secret: string, password: string, confirmPassword: string) => Promise<void>;
+  sendVerification: () => Promise<void>;
+  confirmVerification: (userId: string, secret: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -35,9 +39,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const clearError = () => setError(null);
 
+  const isEmailVerified = (u: Models.User<Models.Preferences> | null) => {
+    // Appwrite user has `emailVerification` boolean.
+    // Keep this resilient to SDK type changes.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Boolean((u as any)?.emailVerification);
+  };
+
   const refreshUser = async () => {
     try {
       const me = await getCurrentUser();
+      if (!isEmailVerified(me)) {
+        // If somehow a non-verified session exists locally, force logout.
+        try {
+          await signOut();
+        } catch {
+          // ignore
+        }
+        setUser(null);
+        return;
+      }
       setUser(me);
     } catch {
       setUser(null);
@@ -73,7 +94,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           setError(null);
           await signInWithEmail(email, password);
-          await refreshUser();
+          const me = await getCurrentUser();
+          if (!isEmailVerified(me)) {
+            // Block access until the user verifies their email.
+            await signOut();
+            setUser(null);
+            setError('Please verify your email before signing in.');
+            throw new Error('EMAIL_NOT_VERIFIED');
+          }
+          setUser(me);
         } catch (e) {
           setError(appwriteErrorMessage(e));
           throw e;
@@ -83,7 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           setError(null);
           await signUpWithEmail({ name, email, password });
-          await refreshUser();
+          // Send verification email, then force user to verify before sign-in.
+          await sendEmailVerification();
+          await signOut();
+          setUser(null);
         } catch (e) {
           setError(appwriteErrorMessage(e));
           throw e;
@@ -110,6 +142,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           setError(null);
           await confirmPasswordRecovery({ userId, secret, password, confirmPassword });
+        } catch (e) {
+          setError(appwriteErrorMessage(e));
+          throw e;
+        }
+      },
+      sendVerification: async () => {
+        try {
+          setError(null);
+          await sendEmailVerification();
+        } catch (e) {
+          setError(appwriteErrorMessage(e));
+          throw e;
+        }
+      },
+      confirmVerification: async (userId, secret) => {
+        try {
+          setError(null);
+          await confirmEmailVerification({ userId, secret });
         } catch (e) {
           setError(appwriteErrorMessage(e));
           throw e;

@@ -3,15 +3,35 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { dark, colors } = useTheme();
+
+  const bg = dark ? "#121212" : colors.background;
+  const text = dark ? "#fff" : "#111";
+  const muted = dark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.60)";
+  const cardBg = dark ? "#1e1e1e" : "#ffffff";
+  const cardBorder = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.08)";
+  const profileBg = dark ? "#232323" : "rgba(0,0,0,0.04)";
+  const imgWrapBg = dark ? "#2a2a2a" : "rgba(0,0,0,0.04)";
+
+  const cardKeyForTitle = (title: string) => {
+    if (title === "Choose a Pizza") return "choose";
+    if (title === "Help Me Choose") return "help";
+    if (title === "Create My Pizza") return "create";
+    if (title === "Fix My Pizza") return "fix";
+    return null;
+  };
+
   return (
-    <View style={styles.screen}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.screen, { backgroundColor: bg }]}>
+      <StatusBar barStyle={dark ? "light-content" : "dark-content"} />
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -20,23 +40,32 @@ export default function HomeScreen() {
           <View style={styles.brandIcon}>
             <MaterialIcons name="local-pizza" size={22} color="#fff" />
           </View>
-          <Text style={styles.brandTitle}>PizzaMate</Text>
-          <View style={styles.profileButton}>
-            <MaterialIcons name="person" size={20} color="#fff" />
+          <Text style={[styles.brandTitle, { color: text }]}>PizzaMate</Text>
+          <View
+            style={[styles.profileButton, { backgroundColor: profileBg }]}
+            accessibilityRole="button"
+            accessibilityLabel="Open Settings"
+            onTouchEnd={() => router.push("/(tabs)/settings")}
+          >
+            <MaterialIcons
+              name="person"
+              size={20}
+              color={dark ? "#fff" : "rgba(0,0,0,0.65)"}
+            />
           </View>
         </View>
 
         <View style={styles.headline}>
-          <Text style={styles.headlinePrimary}>Namaste, Chef!</Text>
-          <Text style={styles.headlineAccent}>What are we baking today?</Text>
+          <Text style={[styles.headlinePrimary, { color: text }]}>{t("home.greetingPrimary")}</Text>
+          <Text style={styles.headlineAccent}>{t("home.greetingAccent")}</Text>
         </View>
 
         <View style={styles.cardStack}>
           {cards.map((card) => (
-            <View key={card.title} style={styles.card}>
+            <View key={card.title} style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
               {card.comingSoon ? (
                 <View style={styles.comingSoonCornerPill} pointerEvents="none">
-                  <Text style={styles.comingSoonText}>Coming Soon</Text>
+                  <Text style={styles.comingSoonText}>{t("common.comingSoon")}</Text>
                 </View>
               ) : null}
               <View style={styles.cardContent}>
@@ -48,10 +77,20 @@ export default function HomeScreen() {
                         size={20}
                         color="#ec1313"
                       />
-                      <Text style={styles.cardTitle}>{card.title}</Text>
+                      <Text style={[styles.cardTitle, { color: text }]}>
+                        {(() => {
+                          const k = cardKeyForTitle(card.title);
+                          return k ? t(`home.cards.${k}.title`) : card.title;
+                        })()}
+                      </Text>
                     </View>
                   </View>
-                  <Text style={styles.cardSubtitle}>{card.description}</Text>
+                  <Text style={[styles.cardSubtitle, { color: muted }]}>
+                    {(() => {
+                      const k = cardKeyForTitle(card.title);
+                      return k ? t(`home.cards.${k}.description`) : card.description;
+                    })()}
+                  </Text>
                 </View>
                 <Button
                   mode={
@@ -71,12 +110,12 @@ export default function HomeScreen() {
                     />
                   )}
                   textColor={
-                    card.buttonStyle === "primary" ? "#fff" : "#f0f0f0"
+                    card.buttonStyle === "primary" ? "#fff" : dark ? "#f0f0f0" : "#111"
                   }
                   buttonColor={
-                    card.buttonStyle === "primary" ? "#ec1313" : "#2a2a2a"
+                    card.buttonStyle === "primary" ? "#ec1313" : dark ? "#2a2a2a" : "rgba(0,0,0,0.06)"
                   }
-                  rippleColor="rgba(255,255,255,0.12)"
+                  rippleColor={dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)"}
                   style={styles.cardButton}
                   contentStyle={styles.cardButtonContent}
                   labelStyle={styles.cardButtonText}
@@ -99,10 +138,13 @@ export default function HomeScreen() {
                     }
                   }}
                 >
-                  {card.button}
+                  {(() => {
+                    const k = cardKeyForTitle(card.title);
+                    return k ? t(`home.cards.${k}.button`) : card.button;
+                  })()}
                 </Button>
               </View>
-              <View style={styles.cardImageWrap}>
+              <View style={[styles.cardImageWrap, { backgroundColor: imgWrapBg }]}>
                 <Image
                   source={{ uri: card.image }}
                   style={styles.cardImage}

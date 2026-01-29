@@ -3,17 +3,31 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const recipe = recipeBySlug[id ?? defaultRecipeSlug] ?? recipeBySlug[defaultRecipeSlug];
   const insets = useSafeAreaInsets();
+  const { i18n } = useTranslation();
+  const lang = i18n.language?.startsWith('hi') ? 'hi' : 'en';
+  const { dark, colors } = useTheme();
+
+  const bg = dark ? '#120a0a' : colors.background;
+  const surface = dark ? '#120a0a' : '#ffffff';
+  const card = dark ? '#2a1616' : 'rgba(0,0,0,0.04)';
+  const border = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.10)';
+  const text = dark ? '#fff' : '#111';
+  const subText = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.60)';
+  // Some Android setups report bottom inset as 0 even with a visible nav bar.
+  // Keep a safe minimum so the CTA never overlaps system navigation.
+  const ctaBottomPad = Math.max(insets.bottom + 12, 48);
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
       <View style={[styles.topBar, { paddingTop: insets.top + 16 }]}>
         <Pressable
           style={styles.topButton}
@@ -31,74 +45,85 @@ export default function RecipeDetailScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 180 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.hero}>
           <Image source={{ uri: recipe.hero }} style={styles.heroImage} contentFit="cover" />
           <View style={styles.heroOverlay} />
         </View>
 
-        <View style={styles.body}>
+        <View style={[styles.body, { backgroundColor: surface }]}>
           <View style={styles.badgeRow}>
-            <Text style={styles.badge}>{recipe.badge.toUpperCase()}</Text>
+            <Text style={styles.badge}>
+              {recipe.badge[lang].toUpperCase()}
+            </Text>
             <View style={styles.rating}>
               <MaterialIcons name="star" size={16} color="#f4c430" />
-              <Text style={styles.ratingText}>{recipe.rating}</Text>
+              <Text style={[styles.ratingText, { color: text }]}>{recipe.rating}</Text>
             </View>
           </View>
 
-          <Text style={styles.title}>{recipe.title}</Text>
-          <Text style={styles.description}>{recipe.description}</Text>
+          <Text style={[styles.title, { color: text }]}>{recipe.title[lang]}</Text>
+          <Text style={[styles.description, { color: subText }]}>
+            {recipe.description[lang]}
+          </Text>
 
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: card, borderColor: border }]}>
               <MaterialIcons name="schedule" size={18} color="#ec1313" />
-              <Text style={styles.statLabel}>TIME</Text>
-              <Text style={styles.statValue}>{recipe.time}</Text>
+              <Text style={[styles.statLabel, { color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.55)' }]}>TIME</Text>
+              <Text style={[styles.statValue, { color: text }]}>{recipe.time[lang]}</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: card, borderColor: border }]}>
               <MaterialIcons name="outdoor-grill" size={18} color="#ec1313" />
-              <Text style={styles.statLabel}>TOOLS</Text>
-              <Text style={styles.statValue}>{recipe.toolsText}</Text>
+              <Text style={[styles.statLabel, { color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.55)' }]}>TOOLS</Text>
+              <Text style={[styles.statValue, { color: text }]}>
+                {recipe.toolsText[lang]}
+              </Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: card, borderColor: border }]}>
               <MaterialIcons name="signal-cellular-alt" size={18} color="#ec1313" />
-              <Text style={styles.statLabel}>LEVEL</Text>
-              <Text style={styles.statValue}>{recipe.level}</Text>
+              <Text style={[styles.statLabel, { color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.55)' }]}>LEVEL</Text>
+              <Text style={[styles.statValue, { color: text }]}>{recipe.level[lang]}</Text>
             </View>
           </View>
 
           <View style={styles.ingredientsHeader}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text style={[styles.sectionTitle, { color: text }]}>Ingredients</Text>
             <Text style={styles.sectionCount}>{recipe.ingredients.length} items</Text>
           </View>
           <View style={styles.ingredientsGrid}>
             {recipe.ingredients.map((ingredient) => (
-              <View key={ingredient.name} style={styles.ingredientItem}>
-                <View style={styles.ingredientImageWrap}>
+              <View key={ingredient.name.en} style={styles.ingredientItem}>
+                <View style={[styles.ingredientImageWrap, { backgroundColor: card, borderColor: border }]}>
                   <Image
                     source={{ uri: ingredient.image }}
                     style={styles.ingredientImage}
                     contentFit="cover"
                   />
                 </View>
-                <Text style={styles.ingredientLabel}>{ingredient.name}</Text>
+                <Text style={[styles.ingredientLabel, { color: dark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.70)' }]}>
+                  {ingredient.name[lang]}
+                </Text>
               </View>
             ))}
           </View>
 
-          <View style={styles.tipCard}>
+          <View style={[styles.tipCard, { backgroundColor: dark ? 'rgba(236,19,19,0.12)' : 'rgba(236,19,19,0.08)' }]}>
             <View style={styles.tipHeader}>
               <MaterialIcons name="tips-and-updates" size={18} color="#ec1313" />
-              <Text style={styles.tipTitle}>Chef's Secret</Text>
+              <Text style={[styles.tipTitle, { color: text }]}>Chef's Secret</Text>
             </View>
-            <Text style={styles.tipText}>
+            <Text style={[styles.tipText, { color: dark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.70)' }]}>
               Preheat your baking tray for 10 minutes to get that restaurant-style crispy base!
             </Text>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.ctaWrap}>
+      <View style={[styles.ctaWrap, { paddingBottom: ctaBottomPad }]}>
         <Button
           mode="contained"
           icon="silverware-fork-knife"

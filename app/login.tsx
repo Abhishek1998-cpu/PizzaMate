@@ -5,14 +5,16 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ImageBackground,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
+    ImageBackground,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// NOTE: Auth screens are intentionally English-only (not localized).
 
 type LoginFormValues = {
   email: string;
@@ -159,20 +161,10 @@ export default function LoginScreen() {
 
         {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
 
-        <Button
-          mode="outlined"
-          textColor="#fff"
-          style={styles.skipButton}
-          contentStyle={styles.signInContent}
-          labelStyle={styles.skipLabel}
-          uppercase
-          onPress={() => router.replace("/(tabs)")}
-        >
-          Continue to Home
-        </Button>
+        {/* Removed "Continue to Home" bypass: users must verify email before accessing the app. */}
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 32, 32) }]}>
         <Text style={styles.footerText}>
           Don&apos;t have an account?{" "}
           <Text
@@ -290,16 +282,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
   },
-  skipButton: {
-    marginTop: 12,
-    borderRadius: 14,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  skipLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    fontFamily: "Inter_500Medium",
-  },
   signInContent: {
     height: 56,
   },
@@ -310,7 +292,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: "auto",
-    paddingBottom: 24,
+    paddingBottom: 32,
     paddingHorizontal: 24,
     alignItems: "center",
   },

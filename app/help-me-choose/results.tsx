@@ -3,6 +3,7 @@ import { helpMeChooseDefaultResultSlugs } from '@/data/ui-constants';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Chip, IconButton, Surface } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,12 +26,17 @@ function parseMinutes(value: string) {
   return Number.isFinite(num) ? num : null;
 }
 
-function recipeMinutes(recipe: { duration: string; time: string }) {
-  return parseMinutes(recipe.duration) ?? parseMinutes(recipe.time);
+function recipeMinutes(recipe: { duration: { en: string; hi: string }; time: { en: string; hi: string } }) {
+  return (
+    parseMinutes(recipe.duration.en) ??
+    parseMinutes(recipe.time.en) ??
+    parseMinutes(recipe.duration.hi) ??
+    parseMinutes(recipe.time.hi)
+  );
 }
 
-function methodMatches(recipe: { method: string; toolsText: string }, selected: string) {
-  const haystack = `${recipe.method} ${recipe.toolsText}`.toLowerCase();
+function methodMatches(recipe: { method: { en: string; hi: string }; toolsText: { en: string; hi: string } }, selected: string) {
+  const haystack = `${recipe.method.en} ${recipe.toolsText.en} ${recipe.method.hi} ${recipe.toolsText.hi}`.toLowerCase();
   if (selected === 'pan') {
     return haystack.includes('pan') || haystack.includes('tawa') || haystack.includes('no oven');
   }
@@ -60,7 +66,7 @@ function scoreRecipe(recipe: (typeof recipes)[number], params: QuizParams) {
   const mins = recipeMinutes(recipe);
   if (params.method && methodMatches(recipe, params.method)) score += 2;
   if (params.time && timeMatches(mins, params.time)) score += 2;
-  if (params.skill) score += skillScore(recipe.level, params.skill);
+  if (params.skill) score += skillScore(recipe.level.en, params.skill);
   return score;
 }
 
@@ -72,6 +78,8 @@ function matchLabel(score: number) {
 
 export default function HelpMeChooseResults() {
   const insets = useSafeAreaInsets();
+  const { i18n } = useTranslation();
+  const lang = i18n.language?.startsWith('hi') ? 'hi' : 'en';
   const params = useLocalSearchParams<QuizParams>();
   const hasAnyParams = Boolean(params.method || params.time || params.skill || params.preference);
 
@@ -90,7 +98,7 @@ export default function HelpMeChooseResults() {
           const ar = Number.parseFloat(a.recipe.rating);
           const br = Number.parseFloat(b.recipe.rating);
           if (Number.isFinite(br) && Number.isFinite(ar) && br !== ar) return br - ar;
-          return a.recipe.title.localeCompare(b.recipe.title);
+          return a.recipe.title.en.localeCompare(b.recipe.title.en);
         })
         .slice(0, 3)
         .map((x, idx) => ({
@@ -183,18 +191,18 @@ export default function HelpMeChooseResults() {
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>
                     <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">
-                      {recipe.title}
+                      {recipe.title[lang]}
                     </Text>
                     <View style={styles.cardMeta}>
                       <MaterialIcons name="schedule" size={14} color="#f4c025" />
                       <Text style={styles.cardMetaText}>
-                        {recipe.time} • {recipe.method}
+                        {recipe.time[lang]} • {recipe.method[lang]}
                       </Text>
                     </View>
                   </View>
                   <View style={[styles.levelBadge, { borderColor: recipe.levelColor }]}>
                     <Text style={[styles.levelText, { color: recipe.levelColor }]}>
-                      {recipe.level.toUpperCase()}
+                      {recipe.level[lang].toUpperCase()}
                     </Text>
                   </View>
                 </View>

@@ -7,6 +7,7 @@ type AppwriteExtra = {
     projectId?: string;
     projectName?: string;
   };
+  webRedirectBaseUrl?: string;
 };
 
 function getConfig() {
@@ -26,6 +27,8 @@ function getConfig() {
     process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ?? extra.appwrite?.projectId;
   const projectName =
     process.env.EXPO_PUBLIC_APPWRITE_PROJECT_NAME ?? extra.appwrite?.projectName;
+  const webRedirectBaseUrl =
+    process.env.EXPO_PUBLIC_WEB_REDIRECT_BASE_URL ?? extra.webRedirectBaseUrl;
 
   // Last-resort fallback to avoid hard-crashing in early app init (values are public anyway).
   const finalEndpoint = endpoint ?? 'https://fra.cloud.appwrite.io/v1';
@@ -37,7 +40,7 @@ function getConfig() {
     );
   }
 
-  return { endpoint: finalEndpoint, projectId: finalProjectId, projectName };
+  return { endpoint: finalEndpoint, projectId: finalProjectId, projectName, webRedirectBaseUrl };
 }
 
 const cfg = getConfig();
@@ -48,3 +51,6 @@ export const appwriteClient = new Client()
 
 export const appwriteAccount = new Account(appwriteClient);
 
+export function getWebRedirectBaseUrl() {
+  return cfg.webRedirectBaseUrl;
+}

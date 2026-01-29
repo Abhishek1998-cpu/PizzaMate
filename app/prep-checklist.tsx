@@ -2,6 +2,7 @@ import { defaultRecipeSlug, recipeBySlug } from "@/data/recipes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import {
     Button,
@@ -9,11 +10,15 @@ import {
     IconButton,
     ProgressBar,
     Surface,
+    useTheme,
 } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PrepChecklistScreen() {
   const insets = useSafeAreaInsets();
+  const { i18n } = useTranslation();
+  const lang = i18n.language?.startsWith("hi") ? "hi" : "en";
+  const { dark, colors } = useTheme();
   const { recipe: recipeSlug } = useLocalSearchParams<{ recipe?: string }>();
   const recipe = recipeBySlug[recipeSlug ?? defaultRecipeSlug];
   const tools = recipe?.prepTools ?? [];
@@ -53,17 +58,25 @@ export default function PrepChecklistScreen() {
   const toggleIngredient = (id: string) =>
     setIngredientState((prev) => ({ ...prev, [id]: !prev[id] }));
 
+  const bg = dark ? "#221010" : colors.background;
+  const text = dark ? "#fff" : "#111";
+  const muted = dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)";
+  const cardBg = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
+  const cardBorder = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.10)";
+  const footerBg = dark ? "rgba(34,16,16,0.95)" : "rgba(255,255,255,0.96)";
+  const unchecked = dark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)";
+
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <IconButton
           icon="arrow-left"
-          iconColor="#fff"
+          iconColor={text}
           size={22}
           onPress={() => router.back()}
           style={styles.backIcon}
         />
-        <Text style={styles.headerTitle}>Prepare Your Space</Text>
+        <Text style={[styles.headerTitle, { color: text }]}>Prepare Your Space</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -75,53 +88,69 @@ export default function PrepChecklistScreen() {
           <View style={styles.progressHeader}>
             <View>
               <Text style={styles.progressLabel}>Current Progress</Text>
-              <Text style={styles.progressText}>
+              <Text style={[styles.progressText, { color: text }]}>
                 {ready} of {total} items ready
               </Text>
             </View>
-            <Text style={styles.progressPercent}>
+            <Text style={[styles.progressPercent, { color: muted }]}>
               {Math.round(progress * 100)}%
             </Text>
           </View>
           <ProgressBar
             progress={progress}
             color="#ec1313"
-            style={styles.progressBar}
+            style={[
+              styles.progressBar,
+              { backgroundColor: dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)" },
+            ]}
           />
         </View>
 
-        <Surface style={styles.recipeCard} elevation={0}>
+        <Surface
+          style={[
+            styles.recipeCard,
+            {
+              backgroundColor: dark ? "rgba(236,19,19,0.08)" : "rgba(236,19,19,0.06)",
+              borderColor: dark ? "rgba(236,19,19,0.25)" : "rgba(236,19,19,0.20)",
+            },
+          ]}
+          elevation={0}
+        >
           <View style={styles.recipeIcon}>
             <MaterialIcons name="restaurant" size={18} color="#ec1313" />
           </View>
           <View>
-            <Text style={styles.recipeTitle}>{recipe?.title}</Text>
+            <Text style={[styles.recipeTitle, { color: text }]}>{recipe ? recipe.title[lang] : ""}</Text>
             <Text
-              style={styles.recipeSubtitle}
-            >{`Prep time: ${recipe?.duration}`}</Text>
+              style={[styles.recipeSubtitle, { color: muted }]}
+            >{`Prep time: ${recipe ? recipe.duration[lang] : ""}`}</Text>
           </View>
         </Surface>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <MaterialIcons name="construction" size={20} color="#ec1313" />
-            <Text style={styles.sectionTitle}>Tools</Text>
+            <Text style={[styles.sectionTitle, { color: text }]}>Tools</Text>
           </View>
           {tools.map((item) => (
-            <Surface key={item.id} style={styles.checkRow} elevation={0}>
+            <Surface
+              key={item.id}
+              style={[styles.checkRow, { backgroundColor: cardBg, borderColor: cardBorder }]}
+              elevation={0}
+            >
               <View style={styles.checkRowContent}>
                 <MaterialIcons
                   name={item.icon as any}
                   size={18}
-                  color="rgba(255,255,255,0.5)"
+                  color={dark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.45)"}
                 />
-                <Text style={styles.checkRowText}>{item.label}</Text>
+                <Text style={[styles.checkRowText, { color: text }]}>{item.label[lang]}</Text>
               </View>
               <Checkbox.Android
                 status={toolState[item.id] ? "checked" : "unchecked"}
                 onPress={() => toggleTool(item.id)}
                 color="#ec1313"
-                uncheckedColor="rgba(255,255,255,0.25)"
+                uncheckedColor={unchecked}
               />
             </Surface>
           ))}
@@ -130,22 +159,28 @@ export default function PrepChecklistScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <MaterialIcons name="local-pizza" size={20} color="#ec1313" />
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text style={[styles.sectionTitle, { color: text }]}>Ingredients</Text>
           </View>
           {ingredients.map((item) => (
-            <Surface key={item.id} style={styles.checkRow} elevation={0}>
+            <Surface
+              key={item.id}
+              style={[styles.checkRow, { backgroundColor: cardBg, borderColor: cardBorder }]}
+              elevation={0}
+            >
               <View style={styles.checkRowContent}>
-                <View style={styles.ingredientIcon}>
+                <View style={[styles.ingredientIcon, { backgroundColor: dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)" }]}>
                   <MaterialIcons
                     name={item.icon as any}
                     size={14}
-                    color="rgba(255,255,255,0.7)"
+                    color={dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.55)"}
                   />
                 </View>
                 <View>
-                  <Text style={styles.checkRowText}>{item.label}</Text>
+                  <Text style={[styles.checkRowText, { color: text }]}>{item.label[lang]}</Text>
                   {item.subtitle ? (
-                    <Text style={styles.checkRowSubtitle}>{item.subtitle}</Text>
+                    <Text style={[styles.checkRowSubtitle, { color: muted }]}>
+                      {item.subtitle[lang]}
+                    </Text>
                   ) : null}
                 </View>
               </View>
@@ -153,7 +188,7 @@ export default function PrepChecklistScreen() {
                 status={ingredientState[item.id] ? "checked" : "unchecked"}
                 onPress={() => toggleIngredient(item.id)}
                 color="#ec1313"
-                uncheckedColor="rgba(255,255,255,0.25)"
+                uncheckedColor={unchecked}
               />
             </Surface>
           ))}
@@ -164,11 +199,14 @@ export default function PrepChecklistScreen() {
         style={[
           styles.ctaWrap,
           { paddingBottom: Math.max(insets.bottom + 12, 20) },
+          { backgroundColor: footerBg },
         ]}
       >
         <Button
           mode="contained"
           icon="chevron-right"
+          buttonColor={allReady ? "#ec1313" : dark ? "#2a1b1b" : "rgba(0,0,0,0.06)"}
+          textColor={allReady ? "#fff" : dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.55)"}
           contentStyle={styles.ctaContent}
           labelStyle={allReady ? styles.ctaLabel : styles.ctaLabelDisabled}
           style={[styles.ctaButton, !allReady && styles.ctaButtonDisabled]}
@@ -180,7 +218,7 @@ export default function PrepChecklistScreen() {
         >
           I'm Ready, Let's Cook!
         </Button>
-        <View style={styles.homeIndicator} />
+        <View style={[styles.homeIndicator, { backgroundColor: dark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.10)" }]} />
       </View>
     </View>
   );

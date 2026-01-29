@@ -32,7 +32,8 @@ export const helpMeChooseSteps: HelpMeChooseStep[] = [
       {
         id: 'oven',
         label: 'Oven / OTG',
-        icon: 'oven',
+        // MaterialIcons doesn't include "oven"; use a close cooking/heat icon.
+        icon: 'local-fire-department',
         image:
           'https://lh3.googleusercontent.com/aida-public/AB6AXuBtFcaaGF8s0BPJkJhvEeRdRK4TpKw0hnr_LUGv6TNqQAWeJJBxnPG3gUnCkjkcnFz5rbolXisTZbfSpwrpyszOwjoJjZKOyUW7TqPMPKtZ9sXyrpYyGlL73_X1u8kmPMxtdCJAr7BHq-egCzxIQ7YWCRGJ8MBOkCh4mI1zJp1uDXkd7zsVp8kZGwAz1Abv6RgblvgMAznBrGhwt2o8MIXIL1UMbZjCojWO1-HIddRv_Y1XVEGdC-_XZtulhyEC5Mg3KhcANROt42IL',
       },

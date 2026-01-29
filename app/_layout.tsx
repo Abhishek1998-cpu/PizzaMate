@@ -10,31 +10,38 @@ import {
 } from '@expo-google-fonts/lexend';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider, configureFonts } from 'react-native-paper';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { initI18n } from '@/i18n';
 import { AuthProvider } from '@/lib/auth/auth-context';
+import { ThemeModeProvider, useThemeMode } from '@/lib/theme/theme-context';
+import { getStoredThemeMode, type ThemeMode } from '@/lib/theme/theme-mode';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_700Bold,
-    Lexend_400Regular,
-    Lexend_500Medium,
-    Lexend_700Bold,
-  });
+function AppShell() {
+  const segments = useSegments();
+  const { mode } = useThemeMode();
+
+  // Auth (unauthenticated) routes are always dark-mode.
+  const isAuthRoute =
+    segments[0] === 'login' ||
+    segments[0] === 'register' ||
+    segments[0] === 'forgot-password' ||
+    segments[0] === 'reset-password' ||
+    segments[0] === 'verify-email' ||
+    segments[0] === 'splash';
+
+  const effectiveScheme: 'dark' | 'light' = isAuthRoute ? 'dark' : mode;
   const paperTheme =
-    colorScheme === 'dark'
+    effectiveScheme === 'dark'
       ? {
           ...MD3DarkTheme,
           colors: {
@@ -94,36 +101,90 @@ export default function RootLayout() {
           }),
         };
 
-  if (!fontsLoaded) {
+  return (
+    <PaperProvider theme={paperTheme}>
+      <ThemeProvider value={effectiveScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AuthProvider>
+          <Stack initialRouteName="splash">
+            <Stack.Screen name="splash" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="prep-checklist" options={{ headerShown: false }} />
+            <Stack.Screen name="cooking-guide" options={{ headerShown: false }} />
+            <Stack.Screen name="cooking-complete" options={{ headerShown: false }} />
+            <Stack.Screen name="help-me-choose" options={{ headerShown: false }} />
+            <Stack.Screen name="help-me-choose/stepper" options={{ headerShown: false }} />
+            <Stack.Screen name="help-me-choose/results" options={{ headerShown: false }} />
+            <Stack.Screen name="coming-soon" options={{ headerShown: false }} />
+            <Stack.Screen name="terms-of-service" options={{ headerShown: false }} />
+            <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="register" options={{ headerShown: false }} />
+            <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+            <Stack.Screen name="reset-password" options={{ headerShown: false }} />
+            <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          </Stack>
+        </AuthProvider>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </PaperProvider>
+  );
+}
+
+export default function RootLayout() {
+  const [i18nReady, setI18nReady] = useState(false);
+  const [themeReady, setThemeReady] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_700Bold,
+    Lexend_400Regular,
+    Lexend_500Medium,
+    Lexend_700Bold,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        await initI18n();
+      } finally {
+        if (mounted) setI18nReady(true);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const stored = await getStoredThemeMode();
+        if (mounted && stored) setThemeMode(stored);
+        // If not set, default to dark (matches existing UI).
+        if (mounted) setThemeReady(true);
+      } catch {
+        if (mounted) setThemeReady(true);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!fontsLoaded || !i18nReady || !themeReady) {
     return null;
   }
 
   return (
     <SafeAreaProvider>
-      <PaperProvider theme={paperTheme}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <AuthProvider>
-            <Stack initialRouteName="splash">
-              <Stack.Screen name="splash" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="prep-checklist" options={{ headerShown: false }} />
-              <Stack.Screen name="cooking-guide" options={{ headerShown: false }} />
-              <Stack.Screen name="cooking-complete" options={{ headerShown: false }} />
-              <Stack.Screen name="help-me-choose" options={{ headerShown: false }} />
-              <Stack.Screen name="help-me-choose/stepper" options={{ headerShown: false }} />
-              <Stack.Screen name="help-me-choose/results" options={{ headerShown: false }} />
-              <Stack.Screen name="coming-soon" options={{ headerShown: false }} />
-              <Stack.Screen name="login" options={{ headerShown: false }} />
-              <Stack.Screen name="register" options={{ headerShown: false }} />
-              <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-              <Stack.Screen name="reset-password" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            </Stack>
-          </AuthProvider>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </PaperProvider>
+      <ThemeModeProvider initialMode={themeMode}>
+        <AppShell />
+      </ThemeModeProvider>
     </SafeAreaProvider>
   );
 }

@@ -5,8 +5,10 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Button, IconButton, TextInput } from "react-native-paper";
+import { Button, Dialog, IconButton, Portal, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// NOTE: Auth screens are intentionally English-only (not localized).
 
 type RegisterFormValues = {
   fullName: string;
@@ -18,6 +20,8 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const { signUp, error: authError, clearError } = useAuth();
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -163,7 +167,8 @@ export default function RegisterScreen() {
           onPress={handleSubmit(async ({ fullName, email, password }) => {
             clearError();
             await signUp(fullName, email, password);
-            router.replace("/(tabs)");
+            setVerifyEmail(email);
+            setVerifyOpen(true);
           })}
         >
           Sign Up
@@ -191,6 +196,29 @@ export default function RegisterScreen() {
         colors={["rgba(34,16,16,0)", "rgba(244,37,37,0.10)"]}
         style={styles.bottomGlow}
       />
+
+      <Portal>
+        <Dialog visible={verifyOpen} onDismiss={() => setVerifyOpen(false)} style={styles.dialog}>
+          <Dialog.Title style={styles.dialogTitle}>Verify your email</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.dialogBody}>
+              We sent a verification link{verifyEmail ? ` to ${verifyEmail}` : ""}. Please verify your email before
+              signing in.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              textColor="rgba(255,255,255,0.75)"
+              onPress={() => {
+                setVerifyOpen(false);
+                router.replace("/login");
+              }}
+            >
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }
@@ -323,5 +351,20 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 200,
+  },
+  dialog: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 14,
+  },
+  dialogTitle: {
+    color: "#fff",
+    fontFamily: "Lexend_700Bold",
+    fontSize: 22,
+  },
+  dialogBody: {
+    color: "rgba(255,255,255,0.75)",
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

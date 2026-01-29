@@ -4,71 +4,105 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.startsWith('hi') ? 'hi' : 'en';
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
+  const { dark, colors } = useTheme();
+
+  const bg = dark ? '#221010' : colors.background;
+  const cardBg = dark ? '#1b1717' : '#ffffff';
+  const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const text = dark ? '#fff' : '#111';
+  const muted = dark ? '#9f9f9f' : 'rgba(0,0,0,0.55)';
+  const chipBg = dark ? '#2a1b1b' : 'rgba(0,0,0,0.04)';
+  const chipBorder = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
 
   const filteredRecipes = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const base = q ? recipes.filter((r) => r.title.toLowerCase().includes(q)) : recipes;
+    const base = q
+      ? recipes.filter((r) =>
+          `${r.title.en} ${r.title.hi}`.toLowerCase().includes(q)
+        )
+      : recipes;
 
     if (activeFilter === 'all') return base;
     if (activeFilter === 'beginner') {
-      return base.filter((r) => r.level.toLowerCase().includes('beginner'));
+      return base.filter(
+        (r) =>
+          r.level.en.toLowerCase().includes('beginner') ||
+          r.level.hi.toLowerCase().includes('शुरुआती')
+      );
     }
     if (activeFilter === 'no-oven') {
       return base.filter((r) => {
-        const hay = `${r.method} ${r.toolsText}`.toLowerCase();
-        return hay.includes('no oven');
+        const hay = `${r.method.en} ${r.toolsText.en} ${r.method.hi} ${r.toolsText.hi}`.toLowerCase();
+        return hay.includes('no oven') || hay.includes('बिना ओवन');
       });
     }
     if (activeFilter === 'pan-tawa') {
       return base.filter((r) => {
-        const hay = `${r.method} ${r.toolsText}`.toLowerCase();
-        return hay.includes('pan') || hay.includes('tawa');
+        const hay = `${r.method.en} ${r.toolsText.en} ${r.method.hi} ${r.toolsText.hi}`.toLowerCase();
+        return (
+          hay.includes('pan') ||
+          hay.includes('tawa') ||
+          hay.includes('पैन') ||
+          hay.includes('तवा')
+        );
       });
     }
     return base;
   }, [query, activeFilter]);
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
           <View style={styles.headerBrand}>
             <MaterialIcons name="local-pizza" size={20} color="#ec1313" />
           </View>
-          <Text style={styles.headerTitle}>Pizza Library</Text>
-          <View style={styles.headerAvatar}>
-            <MaterialIcons name="account-circle" size={20} color="#d1d1d1" />
-          </View>
+          <Text style={[styles.headerTitle, { color: text }]}>{t('library.title')}</Text>
+          <Pressable
+            style={[styles.headerAvatar, { backgroundColor: dark ? '#2a1b1b' : 'rgba(0,0,0,0.04)' }]}
+            onPress={() => router.push('/(tabs)/settings')}
+            accessibilityRole="button"
+            accessibilityLabel="Open Settings"
+          >
+            <MaterialIcons
+              name="account-circle"
+              size={20}
+              color={dark ? '#d1d1d1' : 'rgba(0,0,0,0.45)'}
+            />
+          </Pressable>
         </View>
 
         <View style={styles.searchWrap}>
           <TextInput
             mode="outlined"
-            placeholder="Search Indian pizza recipes..."
-            placeholderTextColor="rgba(255,255,255,0.5)"
-            style={styles.searchInput}
-            outlineColor="rgba(255,255,255,0.08)"
+            placeholder={t('library.searchPlaceholder')}
+            placeholderTextColor={dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)'}
+            style={[styles.searchInput, { backgroundColor: dark ? '#2b1f1f' : 'rgba(0,0,0,0.03)' }]}
+            outlineColor={dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)'}
             activeOutlineColor="#ec1313"
             value={query}
             onChangeText={setQuery}
-            textColor="#fff"
+            textColor={text}
             cursorColor="#ec1313"
             selectionColor="rgba(236,19,19,0.35)"
             theme={{ colors: { primary: '#ec1313' } }}
-            left={<TextInput.Icon icon="magnify" color="rgba(255,255,255,0.6)" />}
+            left={<TextInput.Icon icon="magnify" color={dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.45)'} />}
             right={
               query ? (
                 <TextInput.Icon
                   icon="close"
-                  color="rgba(255,255,255,0.6)"
+                  color={dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.45)'}
                   onPress={() => setQuery('')}
                 />
               ) : null
@@ -86,24 +120,32 @@ export default function LibraryScreen() {
               onPress={() => setActiveFilter(filter.key)}
               style={[
                 styles.filterChip,
+                { backgroundColor: chipBg, borderColor: chipBorder },
                 filter.key === activeFilter && styles.filterChipActive,
               ]}
               accessibilityRole="button"
-              accessibilityLabel={`Filter: ${filter.label}`}
+              accessibilityLabel={`Filter: ${filter.labelKey}`}
               accessibilityState={{ selected: filter.key === activeFilter }}
             >
               <MaterialIcons
                 name={filter.icon as any}
                 size={16}
-                color={filter.key === activeFilter ? '#fff' : '#c7c7c7'}
+                color={filter.key === activeFilter ? '#fff' : dark ? '#c7c7c7' : 'rgba(0,0,0,0.55)'}
               />
               <Text
                 style={[
                   styles.filterText,
+                  { color: dark ? '#c7c7c7' : 'rgba(0,0,0,0.60)' },
                   filter.key === activeFilter && styles.filterTextActive,
                 ]}
               >
-                {filter.label}
+                {filter.key === 'all'
+                  ? t('library.filters.all')
+                  : filter.key === 'no-oven'
+                    ? t('library.filters.noOven')
+                    : filter.key === 'pan-tawa'
+                      ? t('library.filters.panTawa')
+                      : t('library.filters.beginner')}
               </Text>
             </Pressable>
           ))}
@@ -111,26 +153,30 @@ export default function LibraryScreen() {
 
         <View style={styles.cardStack}>
           {filteredRecipes.map((recipe) => (
-            <View key={recipe.title} style={styles.card}>
+            <View key={recipe.slug} style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}>
               <View style={styles.cardImageWrap}>
                 <Image source={{ uri: recipe.image }} style={styles.cardImage} contentFit="cover" />
                 <View style={styles.cardOverlay} />
                 <View style={[styles.levelPill, { backgroundColor: recipe.levelColor }]}>
                   <MaterialIcons name={recipe.levelIcon as any} size={12} color="#fff" />
-                  <Text style={styles.levelText}>{recipe.level.toUpperCase()}</Text>
+                  <Text style={styles.levelText}>{recipe.level[lang].toUpperCase()}</Text>
                 </View>
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{recipe.title}</Text>
+                <Text style={[styles.cardTitle, { color: text }]}>{recipe.title[lang]}</Text>
                 <View style={styles.cardFooter}>
                   <View style={styles.cardMeta}>
                     <View style={styles.cardMetaItem}>
                       <MaterialIcons name="schedule" size={16} color="#9f9f9f" />
-                      <Text style={styles.cardMetaText}>{recipe.duration}</Text>
+                      <Text style={[styles.cardMetaText, { color: muted }]}>
+                        {recipe.duration[lang]}
+                      </Text>
                     </View>
                     <View style={styles.cardMetaItem}>
                       <MaterialIcons name="outdoor-grill" size={16} color="#ec1313" />
-                      <Text style={styles.cardMetaText}>{recipe.method}</Text>
+                      <Text style={[styles.cardMetaText, { color: muted }]}>
+                        {recipe.method[lang]}
+                      </Text>
                     </View>
                   </View>
                   <Button
@@ -139,11 +185,11 @@ export default function LibraryScreen() {
                     textColor="#fff"
                     icon="book-open-variant"
                     onPress={() => router.push(`/recipe/${recipe.slug}`)}
-                    accessibilityLabel={`View recipe for ${recipe.title}`}
+                    accessibilityLabel={`View recipe for ${recipe.title[lang]}`}
                     accessibilityHint="Opens the recipe detail screen"
                     accessibilityRole="button"
                     testID={`view-recipe-${recipe.slug}`}>
-                    View Recipe
+                    {t('library.viewRecipe')}
                   </Button>
                 </View>
               </View>
