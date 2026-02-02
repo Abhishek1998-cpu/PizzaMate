@@ -45,11 +45,19 @@ export default function PrivacyPolicyScreen() {
   const subText = dark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.60)';
   const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
   const cardBg = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+  // Some Android devices report insets.bottom as 0 even with a visible nav bar.
+  // Keep a safe minimum so the CTA never looks stuck to the bottom.
+  const bottomSafePad = Math.max(insets.bottom + 16, 40);
 
   return (
     <View style={[styles.screen, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 6, borderBottomColor: divider }]}>
+      <View
+        style={[
+          styles.header,
+          { paddingTop: insets.top + 10, paddingBottom: 10, borderBottomColor: divider },
+        ]}
+      >
         <IconButton
           icon="chevron-left"
           iconColor="#ec1313"
@@ -61,7 +69,7 @@ export default function PrivacyPolicyScreen() {
         <View style={styles.headerRightSpacer} />
       </View>
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 120 + insets.bottom }]}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 140 + bottomSafePad }]}>
         {/* Headline */}
         <View style={[styles.headline, { paddingHorizontal: H_PADDING }]}>
           <Text style={[styles.h1, { color: text }]}>Privacy Policy</Text>
@@ -166,7 +174,7 @@ export default function PrivacyPolicyScreen() {
         style={[
           styles.bottomBar,
           {
-            paddingBottom: Math.max(insets.bottom, 12),
+            paddingBottom: bottomSafePad,
             borderTopColor: divider,
             backgroundColor: dark ? 'rgba(18,18,18,0.92)' : 'rgba(255,255,255,0.92)',
           },
@@ -191,7 +199,7 @@ export default function PrivacyPolicyScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   header: {
-    height: 56,
+    minHeight: 56,
     paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',

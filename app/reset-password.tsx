@@ -2,7 +2,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, IconButton, ProgressBar, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,137 +36,148 @@ export default function ResetPasswordScreen() {
   }, [password]);
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <IconButton
-          icon="arrow-left"
-          iconColor="#fff"
-          size={22}
-          onPress={() => router.back()}
-          style={styles.backIcon}
-        />
-      </View>
-
-      <View style={styles.hero}>
-        <Text style={styles.title}>New Password</Text>
-        <Text style={styles.subtitle}>
-          Create a new password for your account. Ensure it&apos;s secure and easy to remember.
-        </Text>
-        {!userId || !secret ? (
-          <Text style={styles.missingTokenText}>
-            This reset link is missing information. Please request a new password reset email.
-          </Text>
-        ) : null}
-      </View>
-
-      <View style={styles.form}>
-        <Text style={styles.label}>New Password</Text>
-        <Controller
-          control={control}
-          name="password"
-          rules={{
-            required: 'Password is required',
-            minLength: { value: 8, message: 'Minimum 8 characters' },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="••••••••"
-              placeholderTextColor="#5b5b5b"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="#f42525"
-              textColor="#fff"
-              secureTextEntry={!showPassword}
-              cursorColor="#f42525"
-              contentStyle={styles.inputText}
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  color="#8a8a8a"
-                  onPress={() => setShowPassword((prev) => !prev)}
-                />
-              }
-            />
-          )}
-        />
-        {errors.password ? <Text style={styles.errorText}>{errors.password.message}</Text> : null}
-
-        <View style={styles.strengthHeader}>
-          <Text style={styles.strengthLabel}>SECURITY STRENGTH</Text>
-          <Text style={styles.strengthValue}>{strength.label}</Text>
+    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom + 24, 24) },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <IconButton
+            icon="arrow-left"
+            iconColor="#fff"
+            size={22}
+            onPress={() => router.back()}
+            style={styles.backIcon}
+          />
         </View>
-        <ProgressBar progress={strength.value} color="#f42525" style={styles.strengthBar} />
 
-        <Text style={[styles.label, styles.labelSpacing]}>Confirm New Password</Text>
-        <Controller
-          control={control}
-          name="confirmPassword"
-          rules={{
-            required: 'Please confirm your password',
-            validate: (v) => v === watch('password') || 'Passwords do not match',
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="••••••••"
-              placeholderTextColor="#5b5b5b"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="#f42525"
-              textColor="#fff"
-              secureTextEntry={!showConfirm}
-              cursorColor="#f42525"
-              contentStyle={styles.inputText}
-              right={
-                <TextInput.Icon
-                  icon={showConfirm ? 'eye-off-outline' : 'eye-outline'}
-                  color="#8a8a8a"
-                  onPress={() => setShowConfirm((prev) => !prev)}
-                />
-              }
-            />
-          )}
-        />
-        {errors.confirmPassword ? (
-          <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
-        ) : null}
-      </View>
+        <View style={styles.hero}>
+          <Text style={styles.title}>New Password</Text>
+          <Text style={styles.subtitle}>
+            Create a new password for your account. Ensure it&apos;s secure and easy to remember.
+          </Text>
+          {!userId || !secret ? (
+            <Text style={styles.missingTokenText}>
+              This reset link is missing information. Please request a new password reset email.
+            </Text>
+          ) : null}
+        </View>
 
-      <View style={styles.actions}>
-        <Button
-          mode="contained"
-          buttonColor="#f42525"
-          textColor="#fff"
-          style={styles.ctaButton}
-          contentStyle={styles.ctaContent}
-          labelStyle={styles.ctaLabel}
-          uppercase
-          loading={isSubmitting}
-          disabled={isSubmitting || !userId || !secret}
-          onPress={handleSubmit(async ({ password, confirmPassword }) => {
-            if (!userId || !secret) return;
-            clearError();
-            await confirmRecovery(userId, secret, password, confirmPassword);
-            router.replace('/login');
-          })}
-        >
-          Update Password
-        </Button>
+        <View style={styles.form}>
+          <Text style={styles.label}>New Password</Text>
+          <Controller
+            control={control}
+            name="password"
+            rules={{
+              required: 'Password is required',
+              minLength: { value: 8, message: 'Minimum 8 characters' },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                placeholder="••••••••"
+                placeholderTextColor="#5b5b5b"
+                style={styles.input}
+                underlineColor="transparent"
+                activeUnderlineColor="#f42525"
+                textColor="#fff"
+                secureTextEntry={!showPassword}
+                cursorColor="#f42525"
+                contentStyle={styles.inputText}
+                right={
+                  <TextInput.Icon
+                    icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    color="#8a8a8a"
+                    onPress={() => setShowPassword((prev) => !prev)}
+                  />
+                }
+                returnKeyType="next"
+              />
+            )}
+          />
+          {errors.password ? <Text style={styles.errorText}>{errors.password.message}</Text> : null}
 
-        {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+          <View style={styles.strengthHeader}>
+            <Text style={styles.strengthLabel}>SECURITY STRENGTH</Text>
+            <Text style={styles.strengthValue}>{strength.label}</Text>
+          </View>
+          <ProgressBar progress={strength.value} color="#f42525" style={styles.strengthBar} />
 
-        <Text style={styles.supportText}>
-          Need help? <Text style={styles.supportLink}>Contact Support</Text>
-        </Text>
-      </View>
+          <Text style={[styles.label, styles.labelSpacing]}>Confirm New Password</Text>
+          <Controller
+            control={control}
+            name="confirmPassword"
+            rules={{
+              required: 'Please confirm your password',
+              validate: (v) => v === watch('password') || 'Passwords do not match',
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                placeholder="••••••••"
+                placeholderTextColor="#5b5b5b"
+                style={styles.input}
+                underlineColor="transparent"
+                activeUnderlineColor="#f42525"
+                textColor="#fff"
+                secureTextEntry={!showConfirm}
+                cursorColor="#f42525"
+                contentStyle={styles.inputText}
+                right={
+                  <TextInput.Icon
+                    icon={showConfirm ? 'eye-off-outline' : 'eye-outline'}
+                    color="#8a8a8a"
+                    onPress={() => setShowConfirm((prev) => !prev)}
+                  />
+                }
+                returnKeyType="done"
+              />
+            )}
+          />
+          {errors.confirmPassword ? (
+            <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+          ) : null}
+        </View>
+
+        <View style={styles.actions}>
+          <Button
+            mode="contained"
+            buttonColor="#f42525"
+            textColor="#fff"
+            style={styles.ctaButton}
+            contentStyle={styles.ctaContent}
+            labelStyle={styles.ctaLabel}
+            uppercase
+            loading={isSubmitting}
+            disabled={isSubmitting || !userId || !secret}
+            onPress={handleSubmit(async ({ password, confirmPassword }) => {
+              if (!userId || !secret) return;
+              clearError();
+              await confirmRecovery(userId, secret, password, confirmPassword);
+              router.replace('/login');
+            })}
+          >
+            Update Password
+          </Button>
+
+          {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+
+          <Text style={styles.supportText}>
+            Need help? <Text style={styles.supportLink}>Contact Support</Text>
+          </Text>
+        </View>
+      </ScrollView>
 
       <View style={styles.homeIndicator} />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -174,6 +185,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#0a0a0a',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     paddingHorizontal: 16,

@@ -6,6 +6,7 @@ import {
     requestNotificationPermission,
     setStoredNotificationsEnabled,
 } from '@/lib/notifications/notifications';
+import { getPublicFileViewUrl } from '@/lib/profile/appwrite-profile';
 import { useThemeMode } from '@/lib/theme/theme-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -27,6 +28,10 @@ export default function SettingsScreen() {
   const [isRequestingNotifications, setIsRequestingNotifications] = useState(false);
   const { t } = useTranslation();
   const { dark, colors } = useTheme();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prefs = ((user as any)?.prefs ?? {}) as Record<string, unknown>;
+  const photoFileId = typeof prefs.profile_photoFileId === 'string' ? prefs.profile_photoFileId : null;
+  const profilePhotoUrl = photoFileId ? getPublicFileViewUrl(photoFileId) : null;
 
   const bg = dark ? '#120a0a' : colors.background;
   const cardBg = dark ? '#231010' : '#ffffff';
@@ -35,7 +40,7 @@ export default function SettingsScreen() {
   const subText = dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
   const sectionTitle = dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.45)';
 
-  const currentLang = (['en', 'hi', 'fr', 'es'].includes(i18n.language?.split('-')[0] ?? 'en')
+  const currentLang = (['en', 'hi', 'fr', 'es', 'ur'].includes(i18n.language?.split('-')[0] ?? 'en')
     ? (i18n.language?.split('-')[0] as SupportedLanguage)
     : 'en') as SupportedLanguage;
   const currentLangLabel =
@@ -45,6 +50,8 @@ export default function SettingsScreen() {
         ? t('settings.languageFrench')
         : currentLang === 'es'
           ? t('settings.languageSpanish')
+          : currentLang === 'ur'
+            ? t('settings.languageUrdu', { defaultValue: 'Urdu' })
           : t('settings.languageEnglish');
   const [pendingLang, setPendingLang] = useState<SupportedLanguage>(currentLang);
 
@@ -76,22 +83,35 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Surface style={[styles.profileCard, { backgroundColor: cardBg, borderColor: border }]} elevation={0}>
-          <View style={styles.profileRow}>
-            <Image
-              source={{
-                uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBOd9DYLfUi4dXkJCMW--yu8PD4anCMKuwY6IbQi8p3dLSI_aLPMwY0Q2MUhU0qLxUUCxvqjD2alHQMBYiOt8hh1S6jlNwaG9YIK1jVyoYxwgjk8dOSHJOAsRYn0uzhXqSMZkprMrrg_eVb69SaKTA7YfCs1WjL1Flx-Ru-Sc3jDneLaScX22xP6pIz9Af4WXU_6WUPPckwiDSLlZzsTNGwC35SrvsUr0H41VmEiARY1tj9yRLtJspG2DQb6ltCRzqTV4-EREmcAry5',
-              }}
-              style={styles.profileAvatar}
-            />
-            <View style={styles.profileText}>
-              <Text style={[styles.profileName, { color: text }]}>{user?.name ?? 'Pizza Lover'}</Text>
-              <Text style={[styles.profileEmail, { color: dark ? 'rgba(244,37,37,0.7)' : subText }]}>
-                {user?.email ?? 'Sign in to sync your profile'}
-              </Text>
+        <Pressable
+          onPress={() => router.push('/profile')}
+          accessibilityRole="button"
+          accessibilityLabel="Open Profile"
+        >
+          <Surface style={[styles.profileCard, { backgroundColor: cardBg, borderColor: border }]} elevation={0}>
+            <View style={styles.profileRow}>
+              <Image
+                source={{
+                  uri:
+                    profilePhotoUrl ??
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuBOd9DYLfUi4dXkJCMW--yu8PD4anCMKuwY6IbQi8p3dLSI_aLPMwY0Q2MUhU0qLxUUCxvqjD2alHQMBYiOt8hh1S6jlNwaG9YIK1jVyoYxwgjk8dOSHJOAsRYn0uzhXqSMZkprMrrg_eVb69SaKTA7YfCs1WjL1Flx-Ru-Sc3jDneLaScX22xP6pIz9Af4WXU_6WUPPckwiDSLlZzsTNGwC35SrvsUr0H41VmEiARY1tj9yRLtJspG2DQb6ltCRzqTV4-EREmcAry5',
+                }}
+                style={styles.profileAvatar}
+              />
+              <View style={styles.profileText}>
+                <Text style={[styles.profileName, { color: text }]}>{user?.name ?? 'Pizza Lover'}</Text>
+                <Text style={[styles.profileEmail, { color: dark ? 'rgba(244,37,37,0.7)' : subText }]}>
+                  {user?.email ?? 'Sign in to sync your profile'}
+                </Text>
+              </View>
+              <MaterialIcons
+                name="chevron-right"
+                size={22}
+                color={dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'}
+              />
             </View>
-          </View>
-        </Surface>
+          </Surface>
+        </Pressable>
 
         <Text style={[styles.sectionTitle, { color: sectionTitle }]}>{t('settings.generalPreferences')}</Text>
         <Surface style={[styles.sectionCard, { backgroundColor: cardBg, borderColor: border }]} elevation={0}>
@@ -265,6 +285,10 @@ export default function SettingsScreen() {
               <View style={styles.radioRow}>
                 <RadioButton value="es" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
                 <Text style={styles.radioLabel}>{t('settings.languageSpanish')}</Text>
+              </View>
+              <View style={styles.radioRow}>
+                <RadioButton value="ur" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
+                <Text style={styles.radioLabel}>{t('settings.languageUrdu', { defaultValue: 'Urdu' })}</Text>
               </View>
             </RadioButton.Group>
           </Dialog.Content>

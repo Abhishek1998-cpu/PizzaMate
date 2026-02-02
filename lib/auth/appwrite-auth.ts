@@ -1,5 +1,5 @@
-import * as Linking from 'expo-linking';
 import { ID, Models } from 'appwrite';
+import * as Linking from 'expo-linking';
 import { appwriteAccount, appwriteClient, getWebRedirectBaseUrl } from '../appwrite';
 import { clearStoredSessionId, storeSessionId } from './session';
 
@@ -55,6 +55,12 @@ export async function signOut() {
       // ignore
     }
   }
+}
+
+export async function deleteUser() {
+  // TODO: Actual account deletion requires backend function/permissions
+  // For now, we sign out which effectively removes access on this device
+  await signOut();
 }
 
 export async function getCurrentUser() {

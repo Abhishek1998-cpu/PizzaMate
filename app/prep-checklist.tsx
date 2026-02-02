@@ -17,7 +17,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function PrepChecklistScreen() {
   const insets = useSafeAreaInsets();
   const { i18n } = useTranslation();
-  const lang = i18n.language?.startsWith("hi") ? "hi" : "en";
+  const lang = (["en", "hi", "fr", "es", "ur"].includes(i18n.language?.split("-")[0] ?? "en")
+    ? (i18n.language?.split("-")[0] as "en" | "hi" | "fr" | "es" | "ur")
+    : "en") as "en" | "hi" | "fr" | "es" | "ur";
   const { dark, colors } = useTheme();
   const { recipe: recipeSlug } = useLocalSearchParams<{ recipe?: string }>();
   const recipe = recipeBySlug[recipeSlug ?? defaultRecipeSlug];

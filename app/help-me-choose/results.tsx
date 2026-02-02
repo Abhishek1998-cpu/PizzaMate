@@ -79,7 +79,9 @@ function matchLabel(score: number) {
 export default function HelpMeChooseResults() {
   const insets = useSafeAreaInsets();
   const { i18n } = useTranslation();
-  const lang = i18n.language?.startsWith('hi') ? 'hi' : 'en';
+  const lang = (['en', 'hi', 'fr', 'es', 'ur'].includes(i18n.language?.split('-')[0] ?? 'en')
+    ? (i18n.language?.split('-')[0] as 'en' | 'hi' | 'fr' | 'es' | 'ur')
+    : 'en') as 'en' | 'hi' | 'fr' | 'es' | 'ur';
   const params = useLocalSearchParams<QuizParams>();
   const hasAnyParams = Boolean(params.method || params.time || params.skill || params.preference);
 

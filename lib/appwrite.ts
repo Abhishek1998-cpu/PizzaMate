@@ -1,11 +1,12 @@
+import { Account, Client, Storage } from 'appwrite';
 import Constants from 'expo-constants';
-import { Account, Client } from 'appwrite';
 
 type AppwriteExtra = {
   appwrite?: {
     endpoint?: string;
     projectId?: string;
     projectName?: string;
+    bucketId?: string;
   };
   webRedirectBaseUrl?: string;
 };
@@ -29,6 +30,8 @@ function getConfig() {
     process.env.EXPO_PUBLIC_APPWRITE_PROJECT_NAME ?? extra.appwrite?.projectName;
   const webRedirectBaseUrl =
     process.env.EXPO_PUBLIC_WEB_REDIRECT_BASE_URL ?? extra.webRedirectBaseUrl;
+  const bucketId =
+    process.env.EXPO_PUBLIC_APPWRITE_BUCKET_ID ?? extra.appwrite?.bucketId;
 
   // Last-resort fallback to avoid hard-crashing in early app init (values are public anyway).
   const finalEndpoint = endpoint ?? 'https://fra.cloud.appwrite.io/v1';
@@ -40,7 +43,16 @@ function getConfig() {
     );
   }
 
-  return { endpoint: finalEndpoint, projectId: finalProjectId, projectName, webRedirectBaseUrl };
+  // Bucket id is project-specific. Default for this repo:
+  const finalBucketId = bucketId ?? 'pizza-mate-bucket';
+
+  return {
+    endpoint: finalEndpoint,
+    projectId: finalProjectId,
+    projectName,
+    webRedirectBaseUrl,
+    bucketId: finalBucketId,
+  };
 }
 
 const cfg = getConfig();
@@ -50,7 +62,13 @@ export const appwriteClient = new Client()
   .setProject(cfg.projectId);
 
 export const appwriteAccount = new Account(appwriteClient);
+export const appwriteStorage = new Storage(appwriteClient);
+
+export function getAppwriteConfig() {
+  return cfg;
+}
 
 export function getWebRedirectBaseUrl() {
   return cfg.webRedirectBaseUrl;
 }
+

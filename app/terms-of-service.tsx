@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, IconButton, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -94,11 +94,19 @@ export default function TermsOfServiceScreen() {
   const subText = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.60)';
   const border = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
   const cardBg = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+  // Some Android devices report insets.bottom as 0 even with a visible nav bar.
+  // Keep a safe minimum so the CTA never looks stuck to the bottom.
+  const bottomSafePad = Math.max(insets.bottom + 16, 40);
 
   return (
     <View style={[styles.screen, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 6, borderBottomColor: border }]}>
+      <View
+        style={[
+          styles.header,
+          { paddingTop: insets.top + 10, paddingBottom: 10, borderBottomColor: border },
+        ]}
+      >
         <IconButton
           icon="chevron-left"
           iconColor="#ec1313"
@@ -110,7 +118,7 @@ export default function TermsOfServiceScreen() {
         <View style={styles.headerRightSpacer} />
       </View>
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 120 + insets.bottom }]}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 140 + bottomSafePad }]}>
         {/* Metadata */}
         <View style={styles.meta}>
           <Text style={styles.metaLabel}>LEGAL DOCUMENT</Text>
@@ -190,7 +198,16 @@ export default function TermsOfServiceScreen() {
       </ScrollView>
 
       {/* Sticky bottom action */}
-      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12), backgroundColor: dark ? 'rgba(34,16,16,0.90)' : 'rgba(255,255,255,0.92)', borderTopColor: border }]}>
+      <View
+        style={[
+          styles.bottomBar,
+          {
+            paddingBottom: bottomSafePad,
+            backgroundColor: dark ? 'rgba(34,16,16,0.90)' : 'rgba(255,255,255,0.92)',
+            borderTopColor: border,
+          },
+        ]}
+      >
         <Button
           mode="contained"
           buttonColor="#ec1313"
@@ -210,7 +227,7 @@ export default function TermsOfServiceScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   header: {
-    height: 56,
+    minHeight: 56,
     paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',

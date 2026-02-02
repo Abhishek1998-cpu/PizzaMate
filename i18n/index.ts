@@ -7,8 +7,9 @@ import { en } from './en';
 import { hi } from './hi';
 import { fr } from './fr';
 import { es } from './es';
+import { ur } from './ur';
 
-export type SupportedLanguage = 'en' | 'hi' | 'fr' | 'es';
+export type SupportedLanguage = 'en' | 'hi' | 'fr' | 'es' | 'ur';
 
 const STORAGE_KEY = 'pizzamate.language';
 
@@ -18,12 +19,13 @@ function normalizeLangTag(tag: string): SupportedLanguage {
   if (base === 'hi') return 'hi';
   if (base === 'fr') return 'fr';
   if (base === 'es') return 'es';
+  if (base === 'ur') return 'ur';
   return 'en';
 }
 
 export async function getStoredLanguage(): Promise<SupportedLanguage | null> {
   const stored = await SecureStore.getItemAsync(STORAGE_KEY);
-  if (stored === 'en' || stored === 'hi' || stored === 'fr' || stored === 'es') return stored;
+  if (stored === 'en' || stored === 'hi' || stored === 'fr' || stored === 'es' || stored === 'ur') return stored;
   return null;
 }
 
@@ -46,6 +48,7 @@ export async function initI18n() {
         hi: { translation: hi },
         fr: { translation: fr },
         es: { translation: es },
+        ur: { translation: ur },
       },
       lng,
       fallbackLng: 'en',

@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,94 +26,104 @@ export default function ForgotPasswordScreen() {
   });
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <IconButton
-          icon="arrow-left"
-          iconColor="#fff"
-          size={22}
-          onPress={() => router.back()}
-          style={styles.backIcon}
-        />
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.iconWrap}>
-          <MaterialIcons name="lock-reset" size={44} color="#f42525" />
+    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom + 24, 24) },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <IconButton
+            icon="arrow-left"
+            iconColor="#fff"
+            size={22}
+            onPress={() => router.back()}
+            style={styles.backIcon}
+          />
         </View>
 
-        <Text style={styles.title}>Forgot Password?</Text>
-        <Text style={styles.subtitle}>
-          Enter your email and we’ll send you a link to reset it.
-        </Text>
+        <View style={styles.content}>
+          <View style={styles.iconWrap}>
+            <MaterialIcons name="lock-reset" size={44} color="#f42525" />
+          </View>
 
-        <Text style={styles.label}>Email Address</Text>
-        <Controller
-          control={control}
-          name="email"
-          rules={{
-            required: 'Email is required',
-            pattern: {
-              value: /^\S+@\S+\.\S+$/,
-              message: 'Enter a valid email',
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="e.g. pizzalover@example.com"
-              placeholderTextColor="rgba(255,255,255,0.3)"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="#f42525"
-              textColor="#fff"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              cursorColor="#f42525"
-              contentStyle={styles.inputText}
-            />
-          )}
-        />
-        {errors.email ? <Text style={styles.errorText}>{errors.email.message}</Text> : null}
-
-        <Button
-          mode="contained"
-          buttonColor="#f42525"
-          textColor="#fff"
-          style={styles.ctaButton}
-          contentStyle={styles.ctaContent}
-          labelStyle={styles.ctaLabel}
-          uppercase
-          loading={isSubmitting}
-          disabled={isSubmitting}
-          onPress={handleSubmit(async ({ email }) => {
-            clearError();
-            setSent(false);
-            await sendRecovery(email);
-            setSent(true);
-          })}
-        >
-          Send Reset Link
-        </Button>
-
-        {sent ? (
-          <Text style={styles.successText}>
-            Reset link sent. Please check your email (and spam folder).
+          <Text style={styles.title}>Forgot Password?</Text>
+          <Text style={styles.subtitle}>
+            Enter your email and we’ll send you a link to reset it.
           </Text>
-        ) : null}
 
-        {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+          <Text style={styles.label}>Email Address</Text>
+          <Controller
+            control={control}
+            name="email"
+            rules={{
+              required: 'Email is required',
+              pattern: {
+                value: /^\S+@\S+\.\S+$/,
+                message: 'Enter a valid email',
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                placeholder="e.g. pizzalover@example.com"
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                style={styles.input}
+                underlineColor="transparent"
+                activeUnderlineColor="#f42525"
+                textColor="#fff"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                cursorColor="#f42525"
+                contentStyle={styles.inputText}
+                returnKeyType="done"
+              />
+            )}
+          />
+          {errors.email ? <Text style={styles.errorText}>{errors.email.message}</Text> : null}
 
-        <Pressable style={styles.backLink} onPress={() => router.replace('/login')}>
-          <MaterialIcons name="chevron-left" size={18} color="rgba(255,255,255,0.5)" />
-          <Text style={styles.backText}>Back to Sign In</Text>
-        </Pressable>
-      </View>
+          <Button
+            mode="contained"
+            buttonColor="#f42525"
+            textColor="#fff"
+            style={styles.ctaButton}
+            contentStyle={styles.ctaContent}
+            labelStyle={styles.ctaLabel}
+            uppercase
+            loading={isSubmitting}
+            disabled={isSubmitting}
+            onPress={handleSubmit(async ({ email }) => {
+              clearError();
+              setSent(false);
+              await sendRecovery(email);
+              setSent(true);
+            })}
+          >
+            Send Reset Link
+          </Button>
+
+          {sent ? (
+            <Text style={styles.successText}>
+              Reset link sent. Please check your email (and spam folder).
+            </Text>
+          ) : null}
+
+          {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+
+          <Pressable style={styles.backLink} onPress={() => router.replace('/login')}>
+            <MaterialIcons name="chevron-left" size={18} color="rgba(255,255,255,0.5)" />
+            <Text style={styles.backText}>Back to Sign In</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
 
       <View style={styles.bottomGlow} pointerEvents="none" />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -121,6 +131,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#0a0a0a',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     paddingHorizontal: 16,

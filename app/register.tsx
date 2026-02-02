@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Button, Dialog, IconButton, Portal, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -35,161 +35,177 @@ export default function RegisterScreen() {
   });
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <IconButton
-          icon="arrow-left"
-          iconColor="#fff"
-          size={22}
-          onPress={() => router.back()}
-          style={styles.backIcon}
-        />
-        <View style={styles.headerLogo}>
-          <MaterialIcons name="local-pizza" size={18} color="#fff" />
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom + 24, 24) },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <IconButton
+            icon="arrow-left"
+            iconColor="#fff"
+            size={22}
+            onPress={() => router.back()}
+            style={styles.backIcon}
+          />
+          <View style={styles.headerLogo}>
+            <MaterialIcons name="local-pizza" size={18} color="#fff" />
+          </View>
+          <View style={styles.headerSpacer} />
         </View>
-        <View style={styles.headerSpacer} />
-      </View>
 
-      <View style={styles.hero}>
-        <Text style={styles.title}>Join PizzaMate</Text>
-        <Text style={styles.subtitle}>
-          Start your journey to becoming a master pizzaiolo.
-        </Text>
-      </View>
-
-      <View style={styles.form}>
-        <Text style={styles.label}>Full Name</Text>
-        <Controller
-          control={control}
-          name="fullName"
-          rules={{ required: "Full name is required" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="Gino Sorbillo"
-              placeholderTextColor="rgba(203,144,144,0.6)"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="#f42525"
-              textColor="#fff"
-              cursorColor="#f42525"
-              contentStyle={styles.inputText}
-            />
-          )}
-        />
-        {errors.fullName ? (
-          <Text style={styles.errorText}>{errors.fullName.message}</Text>
-        ) : null}
-
-        <Text style={[styles.label, styles.labelSpacing]}>Email</Text>
-        <Controller
-          control={control}
-          name="email"
-          rules={{
-            required: "Email is required",
-            pattern: {
-              value: /^\S+@\S+\.\S+$/,
-              message: "Enter a valid email",
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="chef@pizzamate.com"
-              placeholderTextColor="rgba(203,144,144,0.6)"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="#f42525"
-              textColor="#fff"
-              cursorColor="#f42525"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              contentStyle={styles.inputText}
-            />
-          )}
-        />
-        {errors.email ? (
-          <Text style={styles.errorText}>{errors.email.message}</Text>
-        ) : null}
-
-        <Text style={[styles.label, styles.labelSpacing]}>Create Password</Text>
-        <Controller
-          control={control}
-          name="password"
-          rules={{
-            required: "Password is required",
-            minLength: { value: 8, message: "Minimum 8 characters" },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="At least 8 characters"
-              placeholderTextColor="rgba(203,144,144,0.6)"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="#f42525"
-              textColor="#fff"
-              cursorColor="#f42525"
-              secureTextEntry={!showPassword}
-              contentStyle={styles.inputText}
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? "eye-off-outline" : "eye-outline"}
-                  color="rgba(203,144,144,0.7)"
-                  onPress={() => setShowPassword((prev) => !prev)}
-                />
-              }
-            />
-          )}
-        />
-        {errors.password ? (
-          <Text style={styles.errorText}>{errors.password.message}</Text>
-        ) : null}
-      </View>
-
-      <View style={styles.actions}>
-        <Button
-          mode="contained"
-          buttonColor="#f42525"
-          textColor="#fff"
-          style={styles.signUpButton}
-          contentStyle={styles.signUpContent}
-          labelStyle={styles.signUpLabel}
-          uppercase
-          loading={isSubmitting}
-          disabled={isSubmitting}
-          onPress={handleSubmit(async ({ fullName, email, password }) => {
-            clearError();
-            await signUp(fullName, email, password);
-            setVerifyEmail(email);
-            setVerifyOpen(true);
-          })}
-        >
-          Sign Up
-        </Button>
-
-        {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
-
-        <Pressable onPress={() => router.replace("/login")}>
-          <Text style={styles.loginText}>
-            Already have an account?{" "}
-            <Text style={styles.loginLink}>Log In</Text>
+        <View style={styles.hero}>
+          <Text style={styles.title}>Join PizzaMate</Text>
+          <Text style={styles.subtitle}>
+            Start your journey to becoming a master pizzaiolo.
           </Text>
-        </Pressable>
-      </View>
+        </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerNote}>
-          By signing up, you agree to cook great pizza and adhere to the secret
-          techniques shared within this community.
-        </Text>
-      </View>
+        <View style={styles.form}>
+          <Text style={styles.label}>Full Name</Text>
+          <Controller
+            control={control}
+            name="fullName"
+            rules={{ required: "Full name is required" }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                placeholder="Gino Sorbillo"
+                placeholderTextColor="rgba(203,144,144,0.6)"
+                style={styles.input}
+                underlineColor="transparent"
+                activeUnderlineColor="#f42525"
+                textColor="#fff"
+                cursorColor="#f42525"
+                contentStyle={styles.inputText}
+                returnKeyType="next"
+              />
+            )}
+          />
+          {errors.fullName ? (
+            <Text style={styles.errorText}>{errors.fullName.message}</Text>
+          ) : null}
+
+          <Text style={[styles.label, styles.labelSpacing]}>Email</Text>
+          <Controller
+            control={control}
+            name="email"
+            rules={{
+              required: "Email is required",
+              pattern: {
+                value: /^\S+@\S+\.\S+$/,
+                message: "Enter a valid email",
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                placeholder="chef@pizzamate.com"
+                placeholderTextColor="rgba(203,144,144,0.6)"
+                style={styles.input}
+                underlineColor="transparent"
+                activeUnderlineColor="#f42525"
+                textColor="#fff"
+                cursorColor="#f42525"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                contentStyle={styles.inputText}
+                returnKeyType="next"
+              />
+            )}
+          />
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email.message}</Text>
+          ) : null}
+
+          <Text style={[styles.label, styles.labelSpacing]}>Create Password</Text>
+          <Controller
+            control={control}
+            name="password"
+            rules={{
+              required: "Password is required",
+              minLength: { value: 8, message: "Minimum 8 characters" },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                placeholder="At least 8 characters"
+                placeholderTextColor="rgba(203,144,144,0.6)"
+                style={styles.input}
+                underlineColor="transparent"
+                activeUnderlineColor="#f42525"
+                textColor="#fff"
+                cursorColor="#f42525"
+                secureTextEntry={!showPassword}
+                contentStyle={styles.inputText}
+                returnKeyType="done"
+                right={
+                  <TextInput.Icon
+                    icon={showPassword ? "eye-off-outline" : "eye-outline"}
+                    color="rgba(203,144,144,0.7)"
+                    onPress={() => setShowPassword((prev) => !prev)}
+                  />
+                }
+              />
+            )}
+          />
+          {errors.password ? (
+            <Text style={styles.errorText}>{errors.password.message}</Text>
+          ) : null}
+        </View>
+
+        <View style={styles.actions}>
+          <Button
+            mode="contained"
+            buttonColor="#f42525"
+            textColor="#fff"
+            style={styles.signUpButton}
+            contentStyle={styles.signUpContent}
+            labelStyle={styles.signUpLabel}
+            uppercase
+            loading={isSubmitting}
+            disabled={isSubmitting}
+            onPress={handleSubmit(async ({ fullName, email, password }) => {
+              clearError();
+              await signUp(fullName, email, password);
+              setVerifyEmail(email);
+              setVerifyOpen(true);
+            })}
+          >
+            Sign Up
+          </Button>
+
+          {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+
+          <Pressable onPress={() => router.replace("/login")}>
+            <Text style={styles.loginText}>
+              Already have an account?{" "}
+              <Text style={styles.loginLink}>Log In</Text>
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerNote}>
+            By signing up, you agree to cook great pizza and adhere to the secret
+            techniques shared within this community.
+          </Text>
+        </View>
+      </ScrollView>
 
       <LinearGradient
         pointerEvents="none"
@@ -219,7 +235,7 @@ export default function RegisterScreen() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -227,6 +243,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#221010",
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     paddingHorizontal: 16,

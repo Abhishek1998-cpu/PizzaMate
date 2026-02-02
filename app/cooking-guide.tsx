@@ -1,5 +1,9 @@
 import { CookingStep, defaultRecipeSlug, recipeBySlug } from "@/data/recipes";
-import { maybeNotifyTimerComplete } from "@/lib/notifications/notifications";
+import {
+    getStoredNotificationsEnabled,
+    maybeNotifyTimerComplete,
+    setStoredNotificationsEnabled,
+} from "@/lib/notifications/notifications";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -48,7 +52,9 @@ function safeSpeechSpeak(text: string) {
 export default function CookingGuideScreen() {
   const insets = useSafeAreaInsets();
   const { i18n } = useTranslation();
-  const lang = i18n.language?.startsWith("hi") ? "hi" : "en";
+  const lang = (["en", "hi", "fr", "es", "ur"].includes(i18n.language?.split("-")[0] ?? "en")
+    ? (i18n.language?.split("-")[0] as "en" | "hi" | "fr" | "es" | "ur")
+    : "en") as "en" | "hi" | "fr" | "es" | "ur";
   const { dark, colors } = useTheme();
   const { recipe: recipeSlug } = useLocalSearchParams<{ recipe?: string }>();
   const steps = recipeBySlug[recipeSlug ?? defaultRecipeSlug]?.steps ?? [];
@@ -61,9 +67,23 @@ export default function CookingGuideScreen() {
 
   const [remaining, setRemaining] = useState(step.durationSeconds ?? 0);
   const [isRunning, setIsRunning] = useState(false);
+  // Master toggle for timer alerts (voice/haptics/vibration + local notification).
+  // Stored via Settings → Notifications.
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [timerFinished, setTimerFinished] = useState(false);
   const [snackVisible, setSnackVisible] = useState(false);
+
+  // Sync alertsEnabled from Settings (persisted).
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const enabled = await getStoredNotificationsEnabled();
+      if (mounted) setAlertsEnabled(enabled);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Reset timer when step changes
   useEffect(() => {
@@ -161,7 +181,11 @@ export default function CookingGuideScreen() {
             icon={alertsEnabled ? "volume-high" : "volume-off"}
             iconColor={text}
             size={22}
-            onPress={() => setAlertsEnabled((v) => !v)}
+            onPress={async () => {
+              const next = !alertsEnabled;
+              setAlertsEnabled(next);
+              await setStoredNotificationsEnabled(next);
+            }}
             style={styles.headerIconButton}
             accessibilityLabel={alertsEnabled ? "Mute timer alerts" : "Unmute timer alerts"}
           />
@@ -181,7 +205,7 @@ export default function CookingGuideScreen() {
         </View>
 
         <Surface style={[styles.imageCard, { borderColor: panelBorder, backgroundColor: panelBg }]}>
-          <Image source={{ uri: step.image }} style={styles.image} />
+          <Image source={{ uri: step.image }} style={styles.image} resizeMode="cover" />
         </Surface>
 
         <View style={styles.textSection}>

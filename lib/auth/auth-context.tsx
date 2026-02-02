@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Models } from 'appwrite';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import { appwriteClient } from '../appwrite';
 import {
   appwriteErrorMessage,
   confirmEmailVerification,
   confirmPasswordRecovery,
+  deleteUser,
   getCurrentUser,
   sendEmailVerification,
   sendPasswordRecovery,
@@ -28,6 +29,7 @@ type AuthContextValue = {
   confirmRecovery: (userId: string, secret: string, password: string, confirmPassword: string) => Promise<void>;
   sendVerification: () => Promise<void>;
   confirmVerification: (userId: string, secret: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -163,6 +165,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (e) {
           setError(appwriteErrorMessage(e));
           throw e;
+        }
+      },
+      deleteAccount: async () => {
+        try {
+          setError(null);
+          await deleteUser();
+        } finally {
+          setUser(null);
         }
       },
     }),

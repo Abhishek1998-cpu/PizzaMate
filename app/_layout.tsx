@@ -105,7 +105,14 @@ function AppShell() {
     <PaperProvider theme={paperTheme}>
       <ThemeProvider value={effectiveScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AuthProvider>
-          <Stack initialRouteName="splash">
+          <Stack
+            initialRouteName="splash"
+            screenOptions={{
+              // Global navigation feel: fade transitions everywhere (stack pushes/replaces).
+              animation: 'fade',
+              headerShown: false,
+            }}
+          >
             <Stack.Screen name="splash" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
@@ -123,6 +130,7 @@ function AppShell() {
             <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
             <Stack.Screen name="reset-password" options={{ headerShown: false }} />
             <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+            <Stack.Screen name="profile" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           </Stack>
         </AuthProvider>

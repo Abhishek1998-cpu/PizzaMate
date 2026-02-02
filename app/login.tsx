@@ -6,7 +6,11 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
     ImageBackground,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     View,
@@ -35,146 +39,163 @@ export default function LoginScreen() {
 
   return (
     <LinearGradient colors={["#121212", "#121212"]} style={styles.screen}>
-      <ImageBackground
-        source={{
-          uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuAlJAamDbwLPhCMpdG2e0uoGcYVOkjuzh_9Cze9x_MaAkdgp0ny-QaeRFSGRErfi2XyKMyAktBaPgJW-_6uzmi48aa7eZOIsOhXqpiDzKQaK73N0up3Z72I3q3TFPSxb4U-RzH_Uce5i9zhnZsBS5wp9sAFFicALWwqlqfbcvD8ACPeMnu31aOW1NL1bB1OZcCehsrpmTaGXRMbD4NQRvvoWXSJLhsoFvz7QwcpbgWx31bjA2pPQAYHIIFBaY7NcUmTvt503zjEciCR",
-        }}
-        style={[styles.hero, { paddingTop: insets.top + 16 }]}
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.heroOverlay} />
-        {/* Smoothly blend hero image into the screen background */}
-        <LinearGradient
-          pointerEvents="none"
-          colors={["rgba(18,18,18,0)", "#121212"]}
-          style={styles.heroFade}
-        />
-        <View style={styles.heroContent}>
-          <View style={styles.logoBadge}>
-            <MaterialIcons name="local-pizza" size={32} color="#fff" />
-          </View>
-          <Text style={styles.brand}>PizzaMate</Text>
-        </View>
-      </ImageBackground>
-
-      <View style={styles.welcome}>
-        <Text style={styles.welcomeTitle}>Welcome Back</Text>
-        <Text style={styles.welcomeSubtitle}>
-          Let&apos;s get cooking the perfect pie
-        </Text>
-      </View>
-
-      <View style={styles.form}>
-        <Text style={styles.label}>Email Address</Text>
-        <Controller
-          control={control}
-          name="email"
-          rules={{
-            required: "Email is required",
-            pattern: {
-              value: /^\S+@\S+\.\S+$/,
-              message: "Enter a valid email",
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="your@email.com"
-              placeholderTextColor="#7c7c7c"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="transparent"
-              textColor="#fff"
-              cursorColor="#f42525"
-              contentStyle={styles.inputText}
-              left={<TextInput.Icon icon="email-outline" color="#7c7c7c" />}
-            />
-          )}
-        />
-        {errors.email ? (
-          <Text style={styles.errorText}>{errors.email.message}</Text>
-        ) : null}
-
-        <Text style={[styles.label, styles.labelSpacing]}>Password</Text>
-        <Controller
-          control={control}
-          name="password"
-          rules={{
-            required: "Password is required",
-            minLength: { value: 6, message: "Minimum 6 characters" },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              mode="flat"
-              value={value}
-              onChangeText={onChange}
-              placeholder="••••••••"
-              placeholderTextColor="#7c7c7c"
-              style={styles.input}
-              underlineColor="transparent"
-              activeUnderlineColor="transparent"
-              textColor="#fff"
-              cursorColor="#f42525"
-              contentStyle={styles.inputText}
-              secureTextEntry={!showPassword}
-              left={<TextInput.Icon icon="lock-outline" color="#7c7c7c" />}
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? "eye-off-outline" : "eye-outline"}
-                  color="#7c7c7c"
-                  onPress={() => setShowPassword((prev) => !prev)}
-                />
-              }
-            />
-          )}
-        />
-        {errors.password ? (
-          <Text style={styles.errorText}>{errors.password.message}</Text>
-        ) : null}
-
-        <Pressable
-          style={styles.forgotRow}
-          onPress={() => router.push("/forgot-password")}
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: Math.max(insets.bottom + 32, 32) },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.forgotText}>Forgot Password?</Text>
-        </Pressable>
-
-        <Button
-          mode="contained"
-          buttonColor="#f42525"
-          textColor="#fff"
-          style={styles.signInButton}
-          contentStyle={styles.signInContent}
-          labelStyle={styles.signInLabel}
-          uppercase
-          loading={isSubmitting}
-          disabled={isSubmitting}
-          onPress={handleSubmit(async ({ email, password }) => {
-            clearError();
-            await signIn(email, password);
-            router.replace("/(tabs)");
-          })}
-        >
-          Sign In
-        </Button>
-
-        {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
-
-        {/* Removed "Continue to Home" bypass: users must verify email before accessing the app. */}
-      </View>
-
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 32, 32) }]}>
-        <Text style={styles.footerText}>
-          Don&apos;t have an account?{" "}
-          <Text
-            style={styles.footerLink}
-            onPress={() => router.push("/register")}
+          <ImageBackground
+            source={{
+              uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuAlJAamDbwLPhCMpdG2e0uoGcYVOkjuzh_9Cze9x_MaAkdgp0ny-QaeRFSGRErfi2XyKMyAktBaPgJW-_6uzmi48aa7eZOIsOhXqpiDzKQaK73N0up3Z72I3q3TFPSxb4U-RzH_Uce5i9zhnZsBS5wp9sAFFicALWwqlqfbcvD8ACPeMnu31aOW1NL1bB1OZcCehsrpmTaGXRMbD4NQRvvoWXSJLhsoFvz7QwcpbgWx31bjA2pPQAYHIIFBaY7NcUmTvt503zjEciCR",
+            }}
+            style={[styles.hero, { paddingTop: insets.top + 16 }]}
           >
-            Create an account
-          </Text>
-        </Text>
-      </View>
+            <View style={styles.heroOverlay} />
+            {/* Smoothly blend hero image into the screen background */}
+            <LinearGradient
+              pointerEvents="none"
+              colors={["rgba(18,18,18,0)", "#121212"]}
+              style={styles.heroFade}
+            />
+            <View style={styles.heroContent}>
+              <View style={styles.logoBadge}>
+                <MaterialIcons name="local-pizza" size={32} color="#fff" />
+              </View>
+              <Text style={styles.brand}>PizzaMate</Text>
+            </View>
+          </ImageBackground>
+
+          <View style={styles.welcome}>
+            <Text style={styles.welcomeTitle}>Welcome Back</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Let&apos;s get cooking the perfect pie
+            </Text>
+          </View>
+
+          <View style={styles.form}>
+            <Text style={styles.label}>Email Address</Text>
+            <Controller
+              control={control}
+              name="email"
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: "Enter a valid email",
+                },
+              }}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  mode="flat"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="your@email.com"
+                  placeholderTextColor="#7c7c7c"
+                  style={styles.input}
+                  underlineColor="transparent"
+                  activeUnderlineColor="transparent"
+                  textColor="#fff"
+                  cursorColor="#f42525"
+                  contentStyle={styles.inputText}
+                  left={<TextInput.Icon icon="email-outline" color="#7c7c7c" />}
+                  returnKeyType="next"
+                />
+              )}
+            />
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email.message}</Text>
+            ) : null}
+
+            <Text style={[styles.label, styles.labelSpacing]}>Password</Text>
+            <Controller
+              control={control}
+              name="password"
+              rules={{
+                required: "Password is required",
+                minLength: { value: 6, message: "Minimum 6 characters" },
+              }}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  mode="flat"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="••••••••"
+                  placeholderTextColor="#7c7c7c"
+                  style={styles.input}
+                  underlineColor="transparent"
+                  activeUnderlineColor="transparent"
+                  textColor="#fff"
+                  cursorColor="#f42525"
+                  contentStyle={styles.inputText}
+                  secureTextEntry={!showPassword}
+                  left={<TextInput.Icon icon="lock-outline" color="#7c7c7c" />}
+                  right={
+                    <TextInput.Icon
+                      icon={showPassword ? "eye-off-outline" : "eye-outline"}
+                      color="#7c7c7c"
+                      onPress={() => setShowPassword((prev) => !prev)}
+                    />
+                  }
+                  returnKeyType="done"
+                />
+              )}
+            />
+            {errors.password ? (
+              <Text style={styles.errorText}>{errors.password.message}</Text>
+            ) : null}
+
+            <Pressable
+              style={styles.forgotRow}
+              onPress={() => router.push("/forgot-password")}
+            >
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </Pressable>
+
+            <Button
+              mode="contained"
+              buttonColor="#f42525"
+              textColor="#fff"
+              style={styles.signInButton}
+              contentStyle={styles.signInContent}
+              labelStyle={styles.signInLabel}
+              uppercase
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              onPress={() => {
+                Keyboard.dismiss();
+                handleSubmit(async ({ email, password }) => {
+                  clearError();
+                  await signIn(email, password);
+                  router.replace("/(tabs)");
+                })();
+              }}
+            >
+              Sign In
+            </Button>
+
+            {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Don&apos;t have an account?{" "}
+              <Text
+                style={styles.footerLink}
+                onPress={() => router.push("/register")}
+              >
+                Create an account
+              </Text>
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
@@ -182,6 +203,9 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   hero: {
     height: 220,

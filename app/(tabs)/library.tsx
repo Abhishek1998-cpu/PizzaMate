@@ -12,7 +12,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
-  const lang = i18n.language?.startsWith('hi') ? 'hi' : 'en';
+  const lang = (['en', 'hi', 'fr', 'es', 'ur'].includes(i18n.language?.split('-')[0] ?? 'en')
+    ? (i18n.language?.split('-')[0] as 'en' | 'hi' | 'fr' | 'es' | 'ur')
+    : 'en') as 'en' | 'hi' | 'fr' | 'es' | 'ur';
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
   const { dark, colors } = useTheme();
@@ -29,7 +31,9 @@ export default function LibraryScreen() {
     const q = query.trim().toLowerCase();
     const base = q
       ? recipes.filter((r) =>
-          `${r.title.en} ${r.title.hi}`.toLowerCase().includes(q)
+          `${r.title.en} ${r.title.hi} ${r.title.fr} ${r.title.es} ${r.title.ur}`
+            .toLowerCase()
+            .includes(q)
         )
       : recipes;
 
@@ -179,18 +183,20 @@ export default function LibraryScreen() {
                       </Text>
                     </View>
                   </View>
-                  <Button
-                    mode="contained"
-                    buttonColor="#ec1313"
-                    textColor="#fff"
-                    icon="book-open-variant"
-                    onPress={() => router.push(`/recipe/${recipe.slug}`)}
-                    accessibilityLabel={`View recipe for ${recipe.title[lang]}`}
-                    accessibilityHint="Opens the recipe detail screen"
-                    accessibilityRole="button"
-                    testID={`view-recipe-${recipe.slug}`}>
-                    {t('library.viewRecipe')}
-                  </Button>
+                  <View style={styles.cardFooterButtonWrap}>
+                    <Button
+                      mode="contained"
+                      buttonColor="#ec1313"
+                      textColor="#fff"
+                      icon="book-open-variant"
+                      onPress={() => router.push(`/recipe/${recipe.slug}`)}
+                      accessibilityLabel={`View recipe for ${recipe.title[lang]}`}
+                      accessibilityHint="Opens the recipe detail screen"
+                      accessibilityRole="button"
+                      testID={`view-recipe-${recipe.slug}`}>
+                      {t('library.viewRecipe')}
+                    </Button>
+                  </View>
                 </View>
               </View>
             </View>
@@ -334,21 +340,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
+    flexWrap: 'wrap',
   },
   cardMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     flex: 1,
+    flexWrap: 'wrap',
+    minWidth: 0,
+    flexShrink: 1,
   },
   cardMetaItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 1,
   },
   cardMetaText: {
     color: '#9f9f9f',
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
+    flexShrink: 1,
+  },
+  cardFooterButtonWrap: {
+    flexShrink: 0,
+    alignSelf: 'flex-end',
+    marginLeft: 'auto',
   },
 });

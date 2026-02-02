@@ -60,11 +60,15 @@ Join our community of developers creating universal apps.
 - i18N - English and Hindi - Done 
 - Dark Mode and Light Mode - Done
 - Profile Icon taking to setting's page - Done
-- Timer completion notification
+- Timer completion notification - Need to test on Real device - Done
 - Terms & Conditions Page Web and App - Done
 - Privacy Policy Page Web and App - Done
 - Deep Linking of Forgot Password and Reset Password - Done
-- Pizza Quiz leadership for Daily enrollment
-- Favorite checklist
-- Android Navigation button overlapping issue
+- Favorite checklist - Done
+- Share button - Done
+- Android Navigation button overlapping issue - Done
+- input field getting hidden by keyboard - Done
+- View Recipe and side text overlap - Done
+- Proper image for all the steps
+- Data validation for all pizza
 

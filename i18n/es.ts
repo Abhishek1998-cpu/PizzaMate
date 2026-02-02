@@ -31,6 +31,7 @@ export const es = {
     languageHindi: 'Hindi',
     languageFrench: 'Francés',
     languageSpanish: 'Español',
+    languageUrdu: 'Urdu',
   },
   home: {
     greetingPrimary: '¡Hola, Chef!',
