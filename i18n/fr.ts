@@ -34,7 +34,7 @@ export const fr = {
     languageUrdu: 'Ourdou',
   },
   home: {
-    greetingPrimary: 'Salut, Chef !',
+    greetingPrimary: 'Bienvenue, Chef !',
     greetingAccent: "Qu’est-ce qu’on cuit aujourd’hui ?",
     cards: {
       choose: {

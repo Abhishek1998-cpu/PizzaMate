@@ -41,6 +41,8 @@ export default function RecipeDetailScreen() {
   const border = dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.10)";
   const text = dark ? "#fff" : "#111";
   const subText = dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.60)";
+  const ctaWrapBg = dark ? "rgba(18,10,10,0.95)" : "#ffffff";
+  const ctaWrapBorder = dark ? "transparent" : "rgba(0,0,0,0.08)";
   // Some Android setups report bottom inset as 0 even with a visible nav bar.
   // Keep a safe minimum so the CTA never overlaps system navigation.
   const ctaBottomPad = Math.max(insets.bottom + 12, 48);
@@ -284,7 +286,17 @@ export default function RecipeDetailScreen() {
         </View>
       </ScrollView>
 
-      <View style={[styles.ctaWrap, { paddingBottom: ctaBottomPad }]}>
+      <View
+        style={[
+          styles.ctaWrap,
+          {
+            paddingBottom: ctaBottomPad,
+            backgroundColor: ctaWrapBg,
+            borderTopWidth: dark ? 0 : 1,
+            borderTopColor: ctaWrapBorder,
+          },
+        ]}
+      >
         <Button
           mode="contained"
           icon="silverware-fork-knife"
@@ -507,7 +519,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 24,
     paddingTop: 12,
-    backgroundColor: "rgba(18,10,10,0.9)",
   },
   ctaButton: {
     borderRadius: 14,

@@ -1,22 +1,29 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Button, IconButton } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Button, IconButton, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 
 export default function HelpMeChooseIntro() {
   const insets = useSafeAreaInsets();
+  const { dark, colors } = useTheme();
+
+  const bg = dark ? '#121212' : colors.background;
+  const text = dark ? '#fff' : '#111';
+  const subText = dark ? '#FFD700' : 'rgba(0,0,0,0.7)';
+  const mutedText = dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)';
+  const backIconBg = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <IconButton
           icon="arrow-left"
-          iconColor="#fff"
+          iconColor={text}
           size={22}
           onPress={() => router.back()}
-          style={styles.backIcon}
+          style={[styles.backIcon, { backgroundColor: backIconBg }]}
         />
         <View style={styles.headerIcon}>
           <MaterialIcons name="local-pizza" size={18} color="#f42525" />
@@ -32,10 +39,10 @@ export default function HelpMeChooseIntro() {
           </View>
         </View>
 
-        <Text style={styles.title}>
+        <Text style={[styles.title, { color: text }]}>
           Let’s find the <Text style={styles.titleAccent}>right</Text> pizza for you
         </Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, { color: subText }]}>
           Answer a few quick questions and we’ll suggest pizzas you can make confidently.
         </Text>
       </View>
@@ -52,7 +59,7 @@ export default function HelpMeChooseIntro() {
           onPress={() => router.push('/help-me-choose/stepper')}>
           Start
         </Button>
-        <Text style={styles.footerNote}>Takes less than 1 minute</Text>
+        <Text style={[styles.footerNote, { color: mutedText }]}>Takes less than 1 minute</Text>
       </View>
 
       <View style={styles.glowRight} pointerEvents="none" />
@@ -64,7 +71,6 @@ export default function HelpMeChooseIntro() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#121212',
   },
   header: {
     paddingHorizontal: 16,
@@ -75,7 +81,6 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     margin: 0,
-    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   headerIcon: {
     width: 40,
@@ -119,7 +124,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f42525',
   },
   title: {
-    color: '#fff',
     fontSize: 36,
     fontWeight: '800',
     fontFamily: 'Lexend_700Bold',
@@ -131,7 +135,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   subtitle: {
-    color: '#FFD700',
     fontSize: 18,
     fontWeight: '500',
     fontFamily: 'Inter_500Medium',
@@ -155,7 +158,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
   },
   footerNote: {
-    color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
     fontSize: 12,
     fontWeight: '700',

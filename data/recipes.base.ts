@@ -143,7 +143,7 @@ export const recipesBase: RecipeBase[] = [
     ingredients: [
       {
         id: "tomato-sauce",
-        image: "https://images.unsplash.com/photo-1604908177522-0403d4e59dba",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980d826001e69fe59a6/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "mozzarella",
@@ -151,7 +151,7 @@ export const recipesBase: RecipeBase[] = [
       },
       {
         id: "basil",
-        image: "https://images.unsplash.com/photo-1524593166156-312f362cada0",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980d8a50013c83b5e7c/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "olive-oil",
@@ -223,7 +223,7 @@ export const recipesBase: RecipeBase[] = [
       },
       {
         id: "tomato-sauce",
-        image: "https://images.unsplash.com/photo-1604908177522-0403d4e59dba",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980d826001e69fe59a6/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "pepperoni-salami",
@@ -231,7 +231,7 @@ export const recipesBase: RecipeBase[] = [
       },
       {
         id: "chilli-flakes",
-        image: "https://images.unsplash.com/photo-1615485925792-93b3bb5d7c71",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980daf50031691c061d/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "olives",
@@ -302,11 +302,11 @@ export const recipesBase: RecipeBase[] = [
       },
       {
         id: "tomato-sauce",
-        image: "https://images.unsplash.com/photo-1604908177522-0403d4e59dba",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980d826001e69fe59a6/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "mushrooms",
-        image: "https://images.unsplash.com/photo-1605477865164-6a8a6f7c5a66",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980db75001799c4a940/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "olives",
@@ -378,11 +378,11 @@ export const recipesBase: RecipeBase[] = [
     ingredients: [
       {
         id: "pizza-dough",
-        image: "https://images.unsplash.com/photo-1601924582975-7f2c8dc9c1d4",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980dc98001709bf063a/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "tomato-sauce",
-        image: "https://images.unsplash.com/photo-1604908177522-0403d4e59dba",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980d826001e69fe59a6/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "mozzarella-cheese",
@@ -457,15 +457,15 @@ export const recipesBase: RecipeBase[] = [
     ingredients: [
       {
         id: "capsicum",
-        image: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980dde00020de63a98a/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "onion",
-        image: "https://images.unsplash.com/photo-1587049352846-4a222e784f0c",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980dd010020296d3a51/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "sweet-corn",
-        image: "https://images.unsplash.com/photo-1604908177522-0403d4e59dba",
+        image: "https://fra.cloud.appwrite.io/v1/storage/buckets/pizza-mate-bucket/files/6980dd7800091e32cc16/view?project=69748622002fa8040371&mode=admin",
       },
       {
         id: "mozzarella-cheese",

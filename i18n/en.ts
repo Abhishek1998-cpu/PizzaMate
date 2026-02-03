@@ -34,7 +34,7 @@ export const en = {
     languageUrdu: 'Urdu',
   },
   home: {
-    greetingPrimary: 'Namaste, Chef!',
+    greetingPrimary: 'Welcome, Chef!',
     greetingAccent: 'What are we baking today?',
     cards: {
       choose: {
@@ -49,7 +49,7 @@ export const en = {
       },
       create: {
         title: 'Create My Pizza',
-        description: 'Build a culinary masterpiece from scratch',
+        description: 'Build a custom culinary masterpiece from scratch',
         button: 'Create',
       },
       fix: {

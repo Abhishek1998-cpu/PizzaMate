@@ -1,29 +1,30 @@
 import { useAuth } from "@/lib/auth/auth-context";
 import {
-  fetchBackendProfile,
-  getPublicFileViewUrl,
-  type Gender,
+    fetchBackendProfile,
+    getPublicFileViewUrl,
+    type Gender,
 } from "@/lib/profile/appwrite-profile";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import {
-  Button,
-  Dialog,
-  IconButton,
-  Portal,
-  TextInput,
-  useTheme
+    Button,
+    Dialog,
+    IconButton,
+    Portal,
+    TextInput,
+    useTheme
 } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -52,6 +53,15 @@ export default function ProfileScreen() {
   const border = dark ? "#3b1a1a" : "rgba(0,0,0,0.10)";
   const text = dark ? "#fff" : "#111";
   const subText = dark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.60)";
+  const labelColor = dark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.75)";
+  const inputBg = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
+  const inputBorder = dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.12)";
+  const mutedIcon = dark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.45)";
+  const deleteBtnColor = dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.5)";
+  const placeholderColor = dark ? "rgba(255,255,255,0.5)" : "#999";
+  const dialogBg = dark ? "#1e1e1e" : "#ffffff";
+  const dialogTextColor = dark ? "#fff" : "#111";
+  const dialogMuted = dark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.7)";
 
   const [loading, setLoading] = useState(true);
 
@@ -69,29 +79,28 @@ export default function ProfileScreen() {
     photoFileId: null,
   });
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        // Source of truth is backend (Appwrite account + prefs).
-        const backend = await fetchBackendProfile();
-        if (!mounted) return;
-        setProfile((p) => ({
-          ...p,
-          fullName: backend.fullName || user?.name || "",
-          age: backend.age ?? null,
-          gender: backend.gender ?? "prefer_not_to_say",
-          photoUri: null,
-          photoFileId: backend.photoFileId ?? null,
-        }));
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
+  const refreshProfile = useCallback(async () => {
+    try {
+      const backend = await fetchBackendProfile();
+      setProfile((p) => ({
+        ...p,
+        fullName: backend.fullName || user?.name || "",
+        age: backend.age ?? null,
+        gender: backend.gender ?? "prefer_not_to_say",
+        photoUri: null,
+        photoFileId: backend.photoFileId ?? null,
+      }));
+    } finally {
+      setLoading(false);
+    }
   }, [user?.name]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      refreshProfile();
+    }, [refreshProfile])
+  );
 
   const ageText = useMemo(() => (profile.age == null ? "" : String(profile.age)), [profile.age]);
 
@@ -103,9 +112,10 @@ export default function ProfileScreen() {
   const handleDeleteAccount = async () => {
     try {
       await deleteAccount();
+      setDeleteDialogOpen(false);
+      router.replace("/login");
     } catch (error) {
       console.error("Failed to delete account:", error);
-    } finally {
       setDeleteDialogOpen(false);
     }
   };
@@ -120,15 +130,15 @@ export default function ProfileScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
           icon="arrow-left"
-          iconColor="#fff"
+          iconColor={text}
           size={24}
           onPress={() => router.back()}
           style={styles.backIcon}
         />
-        <Text style={[styles.headerTitle, { color: "#fff" }]}>Profile</Text>
+        <Text style={[styles.headerTitle, { color: text }]}>Profile</Text>
         <IconButton
           icon="dots-horizontal"
-          iconColor="#fff"
+          iconColor={text}
           size={24}
           onPress={() => setMenuOpen(true)}
           style={styles.backIcon}
@@ -156,10 +166,10 @@ export default function ProfileScreen() {
               </View>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={[styles.namePreview, { color: "#fff" }]} numberOfLines={1}>
+              <Text style={[styles.namePreview, { color: text }]} numberOfLines={1}>
                 {profile.fullName || "Marco Rossi"}
               </Text>
-              <Text style={[styles.emailPreview, { color: "rgba(244,37,37,0.75)" }]} numberOfLines={1}>
+              <Text style={[styles.emailPreview, { color: "#ec1313" }]} numberOfLines={1}>
                 {user?.email ?? "pizzamaster_marco@example.com"}
               </Text>
             </View>
@@ -167,12 +177,12 @@ export default function ProfileScreen() {
 
           {/* Personal Information Section */}
           <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: "#fff" }]}>
+            <Text style={[styles.sectionTitle, { color: text }]}>
               Personal Information
             </Text>
 
             <View style={styles.formGroup}>
-              <Text style={[styles.label, { color: "rgba(255,255,255,0.8)" }]}>Age</Text>
+              <Text style={[styles.label, { color: labelColor }]}>Age</Text>
               <TextInput
                 mode="outlined"
                 value={ageText}
@@ -186,26 +196,27 @@ export default function ProfileScreen() {
                   setProfile((p) => ({ ...p, age: Number.isFinite(n) ? n : null }));
                 }}
                 placeholder="Enter your age"
+                placeholderTextColor={placeholderColor}
                 keyboardType="number-pad"
-                outlineColor="rgba(255,255,255,0.10)"
+                outlineColor={inputBorder}
                 activeOutlineColor="#f42525"
-                textColor="#fff"
+                textColor={text}
                 cursorColor="#f42525"
                 editable={false}
-                style={[styles.input, { backgroundColor: "rgba(255,255,255,0.05)" }]}
+                style={[styles.input, { backgroundColor: inputBg }]}
               />
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={[styles.label, { color: "rgba(255,255,255,0.8)" }]}>Gender</Text>
+              <Text style={[styles.label, { color: labelColor }]}>Gender</Text>
               <Pressable
                 disabled={true}
-                style={[styles.selectInput, { borderColor: "rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.05)" }]}
+                style={[styles.selectInput, { borderColor: inputBorder, backgroundColor: inputBg }]}
                 accessibilityRole="button"
                 accessibilityLabel="Select gender"
               >
-                <Text style={{ color: "#fff", fontFamily: "Inter_400Regular", fontSize: 16 }}>{genderLabel(profile.gender)}</Text>
-                <MaterialIcons name="arrow-drop-down" size={24} color="rgba(255,255,255,0.5)" />
+                <Text style={{ color: text, fontFamily: "Inter_400Regular", fontSize: 16 }}>{genderLabel(profile.gender)}</Text>
+                <MaterialIcons name="arrow-drop-down" size={24} color={mutedIcon} />
               </Pressable>
             </View>
 
@@ -215,7 +226,7 @@ export default function ProfileScreen() {
           {/* Delete Account Button */}
           <Button
             mode="text"
-            textColor="rgba(255,255,255,0.4)"
+            textColor={deleteBtnColor}
             onPress={() => setDeleteDialogOpen(true)}
             style={styles.deleteBtn}
             labelStyle={styles.deleteBtnLabel}
@@ -228,16 +239,16 @@ export default function ProfileScreen() {
       <Portal>
 
 
-        <Dialog visible={deleteDialogOpen} onDismiss={() => setDeleteDialogOpen(false)} style={styles.dialog}>
-          <Dialog.Title style={styles.dialogTitle}>Delete Account</Dialog.Title>
+        <Dialog visible={deleteDialogOpen} onDismiss={() => setDeleteDialogOpen(false)} style={[styles.dialog, { backgroundColor: dialogBg }]}>
+          <Dialog.Title style={[styles.dialogTitle, { color: dialogTextColor }]}>Delete Account</Dialog.Title>
           <Dialog.Content>
-            <Text style={styles.dialogText}>
+            <Text style={[styles.dialogText, { color: dialogTextColor }]}>
               Are you sure you want to delete your account? This action cannot be undone.
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button
-              textColor="rgba(255,255,255,0.75)"
+              textColor={dialogMuted}
               onPress={() => setDeleteDialogOpen(false)}
             >
               Cancel
@@ -251,8 +262,8 @@ export default function ProfileScreen() {
           </Dialog.Actions>
         </Dialog>
 
-        <Dialog visible={menuOpen} onDismiss={() => setMenuOpen(false)} style={styles.dialog}>
-          <Dialog.Title style={styles.dialogTitle}>Profile Options</Dialog.Title>
+        <Dialog visible={menuOpen} onDismiss={() => setMenuOpen(false)} style={[styles.dialog, { backgroundColor: dialogBg }]}>
+          <Dialog.Title style={[styles.dialogTitle, { color: dialogTextColor }]}>Profile Options</Dialog.Title>
           <Dialog.Content>
             <Pressable
               onPress={handleEditProfile}
@@ -261,12 +272,12 @@ export default function ProfileScreen() {
               accessibilityLabel="Edit Profile"
             >
               <MaterialIcons name="edit" size={24} color="#f42525" />
-              <Text style={styles.menuItemText}>Edit Profile</Text>
+              <Text style={[styles.menuItemText, { color: dialogTextColor }]}>Edit Profile</Text>
             </Pressable>
           </Dialog.Content>
           <Dialog.Actions>
             <Button
-              textColor="rgba(255,255,255,0.75)"
+              textColor={dialogMuted}
               onPress={() => setMenuOpen(false)}
             >
               Close

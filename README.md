@@ -69,6 +69,11 @@ Join our community of developers creating universal apps.
 - Android Navigation button overlapping issue - Done
 - input field getting hidden by keyboard - Done
 - View Recipe and side text overlap - Done
-- Proper image for all the steps
-- Data validation for all pizza
+- Proper image for all the steps - Done
+- Data validation for all pizza - Done 
+- Profile picture and flow testing - Done 
+- Light mode Start Cooking button issue - Done
+- Help me Choose Section light mode issue - Done
+- Coming Soon Page light mode - Done
+- Ingredient Icon's Issue - Done
 

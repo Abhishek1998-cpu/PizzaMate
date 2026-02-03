@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Button, IconButton, ProgressBar, Surface } from 'react-native-paper';
+import { Button, IconButton, ProgressBar, Surface, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function buildResultsUrl(answers: Record<string, string>) {
@@ -22,6 +22,7 @@ function buildResultsUrl(answers: Record<string, string>) {
 
 export default function HelpMeChooseStepper() {
   const insets = useSafeAreaInsets();
+  const { dark, colors } = useTheme();
   const steps = helpMeChooseSteps;
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -30,35 +31,47 @@ export default function HelpMeChooseStepper() {
   const canProceed = step.optional || Boolean(selected);
   const totalSteps = steps.length;
 
+  const bg = dark ? '#121212' : colors.background;
+  const text = dark ? '#fff' : '#111';
+  const mutedText = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.65)';
+  const cardBg = dark ? '#2d1818' : '#ffffff';
+  const cardBorder = dark ? '#4a2b2b' : 'rgba(0,0,0,0.12)';
+  const cardBorderSelected = '#f42525';
+  const progressBg = dark ? '#4a2b2b' : 'rgba(0,0,0,0.1)';
+  const footerBg = dark ? '#121212' : colors.background;
+  const footerBorder = dark ? '#4a2b2b' : 'rgba(0,0,0,0.08)';
+  const iconInactive = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
+  const backButtonBg = dark ? 'rgba(244,37,37,0.12)' : 'rgba(244,37,37,0.1)';
+
   const stepLabel = useMemo(
     () => `${stepIndex + 1} of ${totalSteps}`,
     [stepIndex, totalSteps],
   );
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
           icon="arrow-left"
-          iconColor="#fff"
+          iconColor={text}
           size={22}
           onPress={() => router.back()}
           style={styles.closeButton}
         />
-        <Text style={styles.headerTitle}>Help Me Choose</Text>
+        <Text style={[styles.headerTitle, { color: text }]}>Help Me Choose</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.progressWrap}>
         <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>{step.subtitle}</Text>
-          <Text style={styles.progressStep}>{stepLabel}</Text>
+          <Text style={[styles.progressTitle, { color: text }]}>{step.subtitle}</Text>
+          <Text style={[styles.progressStep, { color: mutedText }]}>{stepLabel}</Text>
         </View>
-        <ProgressBar progress={step.progress} color="#f42525" style={styles.progressBar} />
+        <ProgressBar progress={step.progress} color="#f42525" style={[styles.progressBar, { backgroundColor: progressBg }]} />
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.question}>{step.title}</Text>
+        <Text style={[styles.question, { color: text }]}>{step.title}</Text>
 
         {step.options.map((option) => {
           const isSelected = selected === option.id;
@@ -71,7 +84,8 @@ export default function HelpMeChooseStepper() {
               <Surface
                 style={[
                   styles.card,
-                  isSelected ? styles.cardSelected : styles.cardInactive,
+                  { backgroundColor: cardBg },
+                  isSelected ? { borderWidth: 3, borderColor: cardBorderSelected } : { borderWidth: 2, borderColor: cardBorder },
                 ]}
                 elevation={0}
               >
@@ -83,9 +97,9 @@ export default function HelpMeChooseStepper() {
                 <MaterialIcons
                   name={option.icon as any}
                   size={48}
-                  color={isSelected ? '#f42525' : 'rgba(255,255,255,0.7)'}
+                  color={isSelected ? '#f42525' : iconInactive}
                 />
-                <Text style={isSelected ? styles.cardTitle : styles.cardTitleInactive}>
+                <Text style={[isSelected ? styles.cardTitle : styles.cardTitleInactive, { color: isSelected ? text : mutedText }]}>
                   {option.label}
                 </Text>
                 {hasImage ? (
@@ -104,11 +118,11 @@ export default function HelpMeChooseStepper() {
         })}
       </View>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 12, 24), backgroundColor: footerBg, borderTopColor: footerBorder }]}>
         <View style={styles.footerButtons}>
           <Button
             mode="contained-tonal"
-            buttonColor="rgba(244,37,37,0.12)"
+            buttonColor={backButtonBg}
             textColor="#f42525"
             style={styles.footerButton}
             contentStyle={styles.footerButtonContent}
@@ -143,7 +157,6 @@ export default function HelpMeChooseStepper() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#121212',
   },
   header: {
     paddingHorizontal: 16,
@@ -160,7 +173,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     fontFamily: 'Lexend_700Bold',
-    color: '#ffffff',
   },
   headerSpacer: {
     width: 40,
@@ -179,17 +191,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter_500Medium',
-    color: '#ffffff',
   },
   progressStep: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#ffffff',
   },
   progressBar: {
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#4a2b2b',
   },
   content: {
     flex: 1,
@@ -202,23 +211,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'Lexend_700Bold',
     textAlign: 'center',
-    color: '#ffffff',
     marginBottom: 20,
   },
   card: {
-    backgroundColor: '#2d1818',
     borderRadius: 18,
     padding: 20,
     alignItems: 'center',
     marginBottom: 16,
-  },
-  cardSelected: {
-    borderWidth: 3,
-    borderColor: '#f42525',
-  },
-  cardInactive: {
-    borderWidth: 2,
-    borderColor: '#4a2b2b',
   },
   checkBadge: {
     position: 'absolute',
@@ -236,14 +235,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     fontFamily: 'Inter_700Bold',
-    color: '#ffffff',
   },
   cardTitleInactive: {
     marginTop: 8,
     fontSize: 20,
     fontWeight: '700',
     fontFamily: 'Inter_700Bold',
-    color: 'rgba(255,255,255,0.7)',
   },
   cardImage: {
     width: '100%',
@@ -258,10 +255,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: '#4a2b2b',
     paddingHorizontal: 16,
     paddingTop: 12,
-    backgroundColor: '#121212',
   },
   footerButtons: {
     flexDirection: 'row',

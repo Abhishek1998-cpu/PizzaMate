@@ -38,7 +38,7 @@ export const homeCards: HomeCard[] = [
   },
   {
     title: 'Create My Pizza',
-    description: 'Build a culinary masterpiece from scratch',
+    description: 'Build a custom culinary masterpiece from scratch',
     button: 'Create',
     buttonStyle: 'primary',
     icon: 'add-circle',

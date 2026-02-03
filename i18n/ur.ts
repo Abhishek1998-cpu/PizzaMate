@@ -34,7 +34,7 @@ export const ur = {
     languageUrdu: 'اردو',
   },
   home: {
-    greetingPrimary: 'سلام، شیف!',
+    greetingPrimary: 'خوش آمدید، شیف!',
     greetingAccent: 'آج کیا بنائیں گے؟',
     cards: {
       choose: {

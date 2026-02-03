@@ -39,6 +39,11 @@ export default function SettingsScreen() {
   const text = dark ? '#fff' : '#111';
   const subText = dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
   const sectionTitle = dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.45)';
+  const dialogBg = dark ? '#1b1111' : '#ffffff';
+  const dialogTextColor = dark ? '#fff' : '#111';
+  const dialogBodyColor = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)';
+  const dialogMutedColor = dark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.7)';
+  const dialogBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
 
   const currentLang = (['en', 'hi', 'fr', 'es', 'ur'].includes(i18n.language?.split('-')[0] ?? 'en')
     ? (i18n.language?.split('-')[0] as SupportedLanguage)
@@ -220,14 +225,14 @@ export default function SettingsScreen() {
       </ScrollView>
 
       <Portal>
-        <Dialog visible={notificationsOpen} onDismiss={() => (isRequestingNotifications ? null : setNotificationsOpen(false))} style={styles.dialog}>
-          <Dialog.Title style={styles.dialogTitle}>{t('settings.notificationsDialogTitle')}</Dialog.Title>
+        <Dialog visible={notificationsOpen} onDismiss={() => (isRequestingNotifications ? null : setNotificationsOpen(false))} style={[styles.dialog, { backgroundColor: dialogBg, borderColor: dialogBorder }]}>
+          <Dialog.Title style={[styles.dialogTitle, { color: dialogTextColor }]}>{t('settings.notificationsDialogTitle')}</Dialog.Title>
           <Dialog.Content>
-            <Text style={styles.dialogText}>{t('settings.notificationsDialogBody')}</Text>
+            <Text style={[styles.dialogText, { color: dialogBodyColor }]}>{t('settings.notificationsDialogBody')}</Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button
-              textColor={dark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.65)'}
+              textColor={dialogMutedColor}
               disabled={isRequestingNotifications}
               onPress={async () => {
                 // "Not now" means user doesn't want in-app notifications right now,
@@ -262,38 +267,38 @@ export default function SettingsScreen() {
         <Dialog
           visible={languageOpen}
           onDismiss={() => setLanguageOpen(false)}
-          style={styles.dialog}
+          style={[styles.dialog, { backgroundColor: dialogBg, borderColor: dialogBorder }]}
         >
-          <Dialog.Title style={styles.dialogTitle}>{t('settings.language')}</Dialog.Title>
+          <Dialog.Title style={[styles.dialogTitle, { color: dialogTextColor }]}>{t('settings.language')}</Dialog.Title>
           <Dialog.Content>
             <RadioButton.Group
               value={pendingLang}
               onValueChange={(v) => setPendingLang(v as SupportedLanguage)}
             >
               <View style={styles.radioRow}>
-                <RadioButton value="en" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
-                <Text style={styles.radioLabel}>{t('settings.languageEnglish')}</Text>
+                <RadioButton value="en" color="#f42525" uncheckedColor={dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
+                <Text style={[styles.radioLabel, { color: dialogTextColor }]}>{t('settings.languageEnglish')}</Text>
               </View>
               <View style={styles.radioRow}>
-                <RadioButton value="hi" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
-                <Text style={styles.radioLabel}>{t('settings.languageHindi')}</Text>
+                <RadioButton value="hi" color="#f42525" uncheckedColor={dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
+                <Text style={[styles.radioLabel, { color: dialogTextColor }]}>{t('settings.languageHindi')}</Text>
               </View>
               <View style={styles.radioRow}>
-                <RadioButton value="fr" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
-                <Text style={styles.radioLabel}>{t('settings.languageFrench')}</Text>
+                <RadioButton value="fr" color="#f42525" uncheckedColor={dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
+                <Text style={[styles.radioLabel, { color: dialogTextColor }]}>{t('settings.languageFrench')}</Text>
               </View>
               <View style={styles.radioRow}>
-                <RadioButton value="es" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
-                <Text style={styles.radioLabel}>{t('settings.languageSpanish')}</Text>
+                <RadioButton value="es" color="#f42525" uncheckedColor={dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
+                <Text style={[styles.radioLabel, { color: dialogTextColor }]}>{t('settings.languageSpanish')}</Text>
               </View>
               <View style={styles.radioRow}>
-                <RadioButton value="ur" color="#f42525" uncheckedColor="rgba(255,255,255,0.5)" />
-                <Text style={styles.radioLabel}>{t('settings.languageUrdu', { defaultValue: 'Urdu' })}</Text>
+                <RadioButton value="ur" color="#f42525" uncheckedColor={dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
+                <Text style={[styles.radioLabel, { color: dialogTextColor }]}>{t('settings.languageUrdu', { defaultValue: 'Urdu' })}</Text>
               </View>
             </RadioButton.Group>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button textColor="rgba(255,255,255,0.75)" onPress={() => setLanguageOpen(false)}>
+            <Button textColor={dialogMutedColor} onPress={() => setLanguageOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button
@@ -311,17 +316,17 @@ export default function SettingsScreen() {
         <Dialog
           visible={logoutOpen}
           onDismiss={() => (isLoggingOut ? null : setLogoutOpen(false))}
-          style={styles.dialog}
+          style={[styles.dialog, { backgroundColor: dialogBg, borderColor: dialogBorder }]}
         >
-          <Dialog.Title style={styles.dialogTitle}>{t('settings.logoutTitle')}</Dialog.Title>
+          <Dialog.Title style={[styles.dialogTitle, { color: dialogTextColor }]}>{t('settings.logoutTitle')}</Dialog.Title>
           <Dialog.Content>
-            <Text style={styles.dialogText}>
+            <Text style={[styles.dialogText, { color: dialogBodyColor }]}>
               {t('settings.logoutBody')}
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button
-              textColor="rgba(255,255,255,0.75)"
+              textColor={dialogMutedColor}
               disabled={isLoggingOut}
               onPress={() => setLogoutOpen(false)}
             >

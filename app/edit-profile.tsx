@@ -1,24 +1,36 @@
 import { useAuth } from "@/lib/auth/auth-context";
-import { getPublicFileViewUrl, updateBackendProfile, type Gender } from "@/lib/profile/appwrite-profile";
+import { fetchBackendProfile, getPublicFileViewUrl, updateBackendProfile, type Gender } from "@/lib/profile/appwrite-profile";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Button, Dialog, IconButton, Portal, TextInput, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EditProfileScreen() {
     const insets = useSafeAreaInsets();
+    const { height: windowHeight } = useWindowDimensions();
     const { user, refreshUser } = useAuth();
     const { dark, colors } = useTheme();
 
     const bg = dark ? "#221010" : "#f8f5f5";
     const cardBg = dark ? "#341818" : "#ffffff";
-    const border = dark ? "#683131" : "#683131";
+    const border = dark ? "#683131" : "rgba(0,0,0,0.15)";
     const text = dark ? "#fff" : "#111";
     const inputBg = dark ? "#341818" : "#ffffff";
+    const placeholderColor = dark ? "#cb9090" : "#999";
+    const changePhotoBtnBg = dark ? "#492222" : "#6b2d2d";
+    const footerBorder = dark ? "rgba(104,49,49,0.2)" : "rgba(0,0,0,0.08)";
+    const cancelBtnColor = dark ? "#cb9090" : "#666";
+    const dialogBg = dark ? "#1e1e1e" : "#ffffff";
+    const dialogTextColor = dark ? "#fff" : "#111";
+
+    // On short screens, use compact spacing so Gender section is visible
+    const isShortScreen = windowHeight < 700;
+    const footerHeight = 16 + 56 + 12 + 40 + 16 + insets.bottom;
+    const scrollPaddingBottom = Math.max(footerHeight + 80, 200);
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -37,6 +49,29 @@ export default function EditProfileScreen() {
         photoUri: null,
         photoFileId: null,
     });
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const backend = await fetchBackendProfile();
+                if (!mounted) return;
+                setProfile((p) => ({
+                    ...p,
+                    fullName: backend.fullName || user?.name || "",
+                    age: backend.age ?? null,
+                    gender: backend.gender ?? "prefer_not_to_say",
+                    photoUri: null,
+                    photoFileId: backend.photoFileId ?? null,
+                }));
+            } catch (err) {
+                console.error("Failed to fetch profile for edit:", err);
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, [user?.name]);
 
     const ageText = profile.age !== null ? String(profile.age) : "";
 
@@ -99,16 +134,25 @@ export default function EditProfileScreen() {
 
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
                 <ScrollView
-                    contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom + 100, 100) }]}
-                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={[
+                        styles.content,
+                        { paddingBottom: scrollPaddingBottom },
+                        isShortScreen && { paddingTop: 8 },
+                    ]}
+                    showsVerticalScrollIndicator={true}
+                    keyboardShouldPersistTaps="handled"
                 >
                     {/* Profile Photo Section */}
-                    <View style={styles.photoSection}>
+                    <View style={[styles.photoSection, isShortScreen && { paddingVertical: 8 }]}>
                         <Pressable onPress={pickImage} accessibilityRole="button" accessibilityLabel="Change profile picture">
                             <View
                                 style={[
                                     styles.avatar,
-                                    { backgroundColor: "rgba(244,37,37,0.18)", borderColor: "rgba(244,37,37,0.25)" },
+                                    isShortScreen && { width: 96, height: 96, borderRadius: 48 },
+                                    {
+                                        backgroundColor: dark ? "rgba(244,37,37,0.18)" : "rgba(244,37,37,0.10)",
+                                        borderColor: dark ? "rgba(244,37,37,0.25)" : "rgba(244,37,37,0.35)",
+                                    },
                                 ]}
                             >
                                 {profile.photoUri ? (
@@ -116,14 +160,14 @@ export default function EditProfileScreen() {
                                 ) : profile.photoFileId ? (
                                     <Image source={{ uri: getPublicFileViewUrl(profile.photoFileId) }} style={styles.avatarImage} contentFit="cover" />
                                 ) : (
-                                    <MaterialIcons name="account-circle" size={120} color={dark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.55)"} />
+                                    <MaterialIcons name="account-circle" size={isShortScreen ? 88 : 120} color={dark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.55)"} />
                                 )}
                             </View>
                         </Pressable>
 
                         <Button
                             mode="contained"
-                            buttonColor="#492222"
+                            buttonColor={changePhotoBtnBg}
                             textColor="#fff"
                             onPress={pickImage}
                             style={styles.changePhotoBtn}
@@ -148,7 +192,7 @@ export default function EditProfileScreen() {
                                 activeOutlineColor="#f42525"
                                 textColor={text}
                                 cursorColor="#f42525"
-                                placeholderTextColor="#cb9090"
+                                placeholderTextColor={placeholderColor}
                                 style={[styles.input, { backgroundColor: inputBg }]}
                             />
                         </View>
@@ -174,7 +218,7 @@ export default function EditProfileScreen() {
                                 activeOutlineColor="#f42525"
                                 textColor={text}
                                 cursorColor="#f42525"
-                                placeholderTextColor="#cb9090"
+                                placeholderTextColor={placeholderColor}
                                 style={[styles.input, { backgroundColor: inputBg }]}
                             />
                         </View>
@@ -252,7 +296,7 @@ export default function EditProfileScreen() {
                     {
                         paddingBottom: Math.max(insets.bottom + 16, 16),
                         backgroundColor: bg,
-                        borderTopColor: "rgba(104,49,49,0.2)",
+                        borderTopColor: footerBorder,
                     },
                 ]}
             >
@@ -272,7 +316,7 @@ export default function EditProfileScreen() {
 
                 <Button
                     mode="text"
-                    textColor={dark ? "#cb9090" : "#666"}
+                    textColor={cancelBtnColor}
                     onPress={handleCancel}
                     style={styles.cancelBtn}
                     labelStyle={styles.cancelBtnLabel}
@@ -285,11 +329,11 @@ export default function EditProfileScreen() {
                 <Dialog
                     visible={imagePickerMissing}
                     onDismiss={() => setImagePickerMissing(false)}
-                    style={styles.dialog}
+                    style={[styles.dialog, { backgroundColor: dialogBg }]}
                 >
-                    <Dialog.Title style={styles.dialogTitle}>Upload unavailable</Dialog.Title>
+                    <Dialog.Title style={[styles.dialogTitle, { color: dialogTextColor }]}>Upload unavailable</Dialog.Title>
                     <Dialog.Content>
-                        <Text style={styles.dialogText}>
+                        <Text style={[styles.dialogText, { color: dialogTextColor }]}>
                             Image upload isn&apos;t available in this build. Please rebuild the app with
                             <Text style={{ fontFamily: "Inter_700Bold" }}> expo-image-picker</Text> included.
                         </Text>
@@ -365,7 +409,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
     },
     fieldGroup: {
-        paddingVertical: 12,
+        paddingVertical: 10,
     },
     label: {
         fontSize: 16,

@@ -2,7 +2,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
     ImageBackground,
@@ -28,7 +28,13 @@ type LoginFormValues = {
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, error: authError, clearError } = useAuth();
+  const { user, isLoading, signIn, error: authError, clearError } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/(tabs)");
+    }
+  }, [isLoading, user]);
   const {
     control,
     handleSubmit,

@@ -2,16 +2,21 @@ import { Tabs, usePathname } from "expo-router";
 import React, { useEffect, useRef } from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeMode } from "@/lib/theme/theme-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Animated } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { mode } = useThemeMode();
   const pathname = usePathname();
   const opacity = useRef(new Animated.Value(1)).current;
   const insets = useSafeAreaInsets();
+
+  const dark = mode === "dark";
+  const tabBarBg = dark ? "#000000" : "#ffffff";
+  const tabBarBorder = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const tabBarInactive = dark ? "#7a7a7a" : "#666666";
 
   useEffect(() => {
     // Fade in on every tab navigation change for smoother UX.
@@ -31,10 +36,10 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#ec1313",
-          tabBarInactiveTintColor: "#7a7a7a",
+          tabBarInactiveTintColor: tabBarInactive,
           tabBarStyle: {
-            backgroundColor: "#000000",
-            borderTopColor: "rgba(255,255,255,0.08)",
+            backgroundColor: tabBarBg,
+            borderTopColor: tabBarBorder,
             paddingBottom: Math.max(insets.bottom, 8),
             paddingTop: 6,
             height: 62 + Math.max(insets.bottom, 8),

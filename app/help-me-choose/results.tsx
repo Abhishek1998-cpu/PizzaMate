@@ -5,7 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Chip, IconButton, Surface } from 'react-native-paper';
+import { Button, Chip, IconButton, Surface, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const resultRecipes = helpMeChooseDefaultResultSlugs
@@ -78,7 +78,20 @@ function matchLabel(score: number) {
 
 export default function HelpMeChooseResults() {
   const insets = useSafeAreaInsets();
+  const { dark, colors } = useTheme();
   const { i18n } = useTranslation();
+
+  const bg = dark ? '#121212' : colors.background;
+  const text = dark ? '#fff' : '#111';
+  const subText = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.65)';
+  const headerBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const cardBg = dark ? '#1c1c1c' : '#ffffff';
+  const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const chipBg = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const chipTextColor = dark ? '#fff' : '#111';
+  const footerBg = dark ? 'rgba(18,18,18,0.95)' : '#ffffff';
+  const footerBtnBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const footerBtnText = dark ? '#fff' : '#111';
   const lang = (['en', 'hi', 'fr', 'es', 'ur'].includes(i18n.language?.split('-')[0] ?? 'en')
     ? (i18n.language?.split('-')[0] as 'en' | 'hi' | 'fr' | 'es' | 'ur')
     : 'en') as 'en' | 'hi' | 'fr' | 'es' | 'ur';
@@ -128,26 +141,26 @@ export default function HelpMeChooseResults() {
     params.preference === 'veg' ? 'Veg' : params.preference === 'non-veg' ? 'Non‑veg' : null;
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+    <View style={[styles.screen, { backgroundColor: bg }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 8, borderBottomColor: headerBorder }]}>
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <IconButton
               icon="arrow-left"
-              iconColor="#fff"
+              iconColor={text}
               size={20}
               onPress={() => router.back()}
               style={styles.backIcon}
             />
-            <Text style={styles.headerTitle}>Personalized Results</Text>
+            <Text style={[styles.headerTitle, { color: text }]}>Personalized Results</Text>
           </View>
           <MaterialIcons name="local-pizza" size={20} color="#f4c025" />
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Perfect pizzas for your kitchen</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: text }]}>Perfect pizzas for your kitchen</Text>
+        <Text style={[styles.subtitle, { color: subText }]}>
           Based on your answers, these pizzas are most likely to succeed with your current
           equipment.
         </Text>
@@ -161,17 +174,17 @@ export default function HelpMeChooseResults() {
             Top Matches
           </Chip>
           {preferenceChip ? (
-            <Chip style={styles.chip} textStyle={styles.chipText}>
+            <Chip style={[styles.chip, { backgroundColor: chipBg }]} textStyle={[styles.chipText, { color: chipTextColor }]}>
               {preferenceChip}
             </Chip>
           ) : null}
           {timeChip ? (
-            <Chip style={styles.chip} textStyle={styles.chipText}>
+            <Chip style={[styles.chip, { backgroundColor: chipBg }]} textStyle={[styles.chipText, { color: chipTextColor }]}>
               {timeChip}
             </Chip>
           ) : null}
           {methodChip ? (
-            <Chip style={styles.chip} textStyle={styles.chipText}>
+            <Chip style={[styles.chip, { backgroundColor: chipBg }]} textStyle={[styles.chipText, { color: chipTextColor }]}>
               {methodChip}
             </Chip>
           ) : null}
@@ -179,7 +192,7 @@ export default function HelpMeChooseResults() {
 
         <View style={styles.cardStack}>
           {cards.map(({ recipe, match, highlight }) => (
-            <Surface key={recipe.slug} style={styles.card} elevation={0}>
+            <Surface key={recipe.slug} style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]} elevation={0}>
               <View style={styles.cardImageWrap}>
                 <Image source={{ uri: recipe.image }} style={styles.cardImage} />
                 <View style={styles.cardGradient} />
@@ -192,12 +205,12 @@ export default function HelpMeChooseResults() {
               <View style={styles.cardContent}>
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>
-                    <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">
+                    <Text style={[styles.cardTitle, { color: text }]} numberOfLines={2} ellipsizeMode="tail">
                       {recipe.title[lang]}
                     </Text>
                     <View style={styles.cardMeta}>
                       <MaterialIcons name="schedule" size={14} color="#f4c025" />
-                      <Text style={styles.cardMetaText}>
+                      <Text style={[styles.cardMetaText, { color: subText }]}>
                         {recipe.time[lang]} • {recipe.method[lang]}
                       </Text>
                     </View>
@@ -210,8 +223,8 @@ export default function HelpMeChooseResults() {
                 </View>
                 <Button
                   mode={highlight ? 'contained' : 'contained-tonal'}
-                  buttonColor={highlight ? '#f4c025' : 'rgba(255,255,255,0.1)'}
-                  textColor={highlight ? '#231e10' : '#fff'}
+                  buttonColor={highlight ? '#f4c025' : (dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)')}
+                  textColor={highlight ? '#231e10' : (dark ? '#fff' : '#111')}
                   contentStyle={styles.cardButtonContent}
                   labelStyle={styles.cardButtonLabel}
                   icon="chevron-right"
@@ -235,11 +248,11 @@ export default function HelpMeChooseResults() {
         </Button>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 16, 24) }]}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 16, 24), backgroundColor: footerBg }]}>
         <Button
           mode="contained-tonal"
-          buttonColor="rgba(255,255,255,0.06)"
-          textColor="#fff"
+          buttonColor={footerBtnBg}
+          textColor={footerBtnText}
           contentStyle={styles.footerButtonContent}
           labelStyle={styles.footerButtonLabel}
           style={styles.footerButton}
@@ -254,13 +267,11 @@ export default function HelpMeChooseResults() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#121212',
   },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   headerRow: {
     flexDirection: 'row',
@@ -276,7 +287,6 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   headerTitle: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '700',
     fontFamily: 'Lexend_700Bold',
@@ -290,13 +300,11 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     fontFamily: 'Lexend_700Bold',
-    color: '#fff',
   },
   subtitle: {
     marginTop: 8,
     fontSize: 15,
     lineHeight: 22,
-    color: 'rgba(255,255,255,0.7)',
     fontFamily: 'Inter_400Regular',
   },
   chipRow: {
@@ -316,10 +324,8 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   chip: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   chipText: {
-    color: '#fff',
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
   },
@@ -328,9 +334,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 18,
-    backgroundColor: '#1c1c1c',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     overflow: 'hidden',
   },
   cardImageWrap: {
@@ -373,7 +377,6 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   cardTitle: {
-    color: '#fff',
     fontSize: 20,
     fontWeight: '700',
     fontFamily: 'Lexend_700Bold',
@@ -386,7 +389,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   cardMetaText: {
-    color: 'rgba(255,255,255,0.6)',
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },
@@ -425,7 +427,6 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingTop: 12,
-    backgroundColor: 'rgba(18,18,18,0.95)',
   },
   footerButton: {
     borderRadius: 999,
