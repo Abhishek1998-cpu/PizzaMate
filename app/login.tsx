@@ -1,4 +1,5 @@
 import { useAuth } from "@/lib/auth/auth-context";
+import { checkAppwriteConnectivity } from "@/lib/appwrite";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -13,9 +14,10 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    useWindowDimensions,
     View,
 } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button, Dialog, Portal, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // NOTE: Auth screens are intentionally English-only (not localized).
@@ -26,6 +28,7 @@ type LoginFormValues = {
 };
 
 export default function LoginScreen() {
+  const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const { user, isLoading, signIn, error: authError, clearError } = useAuth();
@@ -35,6 +38,14 @@ export default function LoginScreen() {
       router.replace("/(tabs)");
     }
   }, [isLoading, user]);
+
+  // Dev-only: log Appwrite endpoint and run a quick health check to debug "Network request failed"
+  useEffect(() => {
+    if (__DEV__) {
+      checkAppwriteConnectivity();
+    }
+  }, []);
+
   const {
     control,
     handleSubmit,
@@ -44,16 +55,23 @@ export default function LoginScreen() {
   });
 
   return (
-    <LinearGradient colors={["#121212", "#121212"]} style={styles.screen}>
+    <LinearGradient
+      colors={["#121212", "#121212"]}
+      style={[styles.screen, { width: windowWidth }]}
+    >
       <KeyboardAvoidingView
-        style={styles.screen}
+        style={[styles.screen, { width: windowWidth }]}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom + 32, 32) },
+            {
+              width: windowWidth,
+              paddingBottom: Math.max(insets.bottom + 32, 32),
+            },
           ]}
+          style={styles.scrollView}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -185,8 +203,6 @@ export default function LoginScreen() {
             >
               Sign In
             </Button>
-
-            {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
           </View>
 
           <View style={styles.footer}>
@@ -202,6 +218,24 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Portal>
+        <Dialog
+          visible={Boolean(authError)}
+          onDismiss={clearError}
+          style={styles.errorDialog}
+        >
+          <Dialog.Title style={styles.errorDialogTitle}>Sign in failed</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.errorDialogMessage}>{authError ?? ""}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button textColor="#f42525" onPress={clearError}>
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </LinearGradient>
   );
 }
@@ -209,9 +243,15 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    alignSelf: "stretch",
+  },
+  scrollView: {
+    flex: 1,
+    alignSelf: "stretch",
   },
   scrollContent: {
     flexGrow: 1,
+    alignSelf: "stretch",
   },
   hero: {
     height: 220,
@@ -294,6 +334,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_500Medium",
     marginTop: 6,
+  },
+  errorDialog: {
+    backgroundColor: "#1e1e1e",
+  },
+  errorDialogTitle: {
+    color: "#fff",
+    fontFamily: "Lexend_700Bold",
+  },
+  errorDialogMessage: {
+    color: "rgba(255,255,255,0.85)",
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
   },
   forgotRow: {
     alignItems: "flex-end",

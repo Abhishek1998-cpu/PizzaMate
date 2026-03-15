@@ -3,12 +3,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SPLASH_DURATION_MS = 3000;
 
 export default function SplashScreen() {
+  const { width: windowWidth } = useWindowDimensions();
   const { user, isLoading } = useAuth();
   const progress = useRef(new Animated.Value(0)).current;
   const progressWidth = useMemo(
@@ -49,7 +50,7 @@ export default function SplashScreen() {
   }, [progress, isLoading, user]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { width: windowWidth }]}>
       <StatusBar style="light" />
       <View style={styles.texture} />
       <View style={styles.content}>
@@ -82,6 +83,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignSelf: 'stretch',
     backgroundColor: '#121010',
     paddingHorizontal: 24,
   },

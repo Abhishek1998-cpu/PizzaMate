@@ -6,7 +6,12 @@ import { clearStoredSessionId, getStoredSessionId, storeSessionId } from './sess
 export function appwriteErrorMessage(err: unknown) {
   if (!err || typeof err !== 'object') return 'Something went wrong';
   const anyErr = err as { message?: string };
-  return anyErr.message ?? 'Something went wrong';
+  const msg = anyErr.message ?? 'Something went wrong';
+  // Help users when the device can't reach the server (tablet/emulator network, no internet).
+  if (msg === 'Network request failed' || (typeof msg === 'string' && msg.includes('Network request failed'))) {
+    return 'Network request failed. Check your internet connection and try again.';
+  }
+  return msg;
 }
 
 export async function signInWithEmail(email: string, password: string) {

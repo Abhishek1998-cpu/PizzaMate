@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ActivityIndicator, Button, IconButton } from 'react-native-paper';
+import { ActivityIndicator, Button, Dialog, IconButton, Portal } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/lib/auth/auth-context';
@@ -86,7 +86,6 @@ export default function VerifyEmailScreen() {
                 ? 'This verification link is missing information. Please request a new verification email.'
                 : 'We could not verify your email. Please try again or request a new verification email.'}
             </Text>
-            {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
             <Button
               mode="contained"
               buttonColor="#f42525"
@@ -102,6 +101,24 @@ export default function VerifyEmailScreen() {
           </>
         )}
       </View>
+
+      <Portal>
+        <Dialog
+          visible={Boolean(authError)}
+          onDismiss={clearError}
+          style={styles.errorDialog}
+        >
+          <Dialog.Title style={styles.errorDialogTitle}>Verification failed</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.errorDialogMessage}>{authError ?? ''}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button textColor="#f42525" onPress={clearError}>
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }
@@ -155,6 +172,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     maxWidth: 320,
+  },
+  errorDialog: {
+    backgroundColor: '#1e1e1e',
+  },
+  errorDialogTitle: {
+    color: '#fff',
+    fontFamily: 'Lexend_700Bold',
+  },
+  errorDialogMessage: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
   },
   ctaButton: {
     marginTop: 22,

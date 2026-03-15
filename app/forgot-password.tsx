@@ -3,8 +3,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, IconButton, TextInput } from 'react-native-paper';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Button, Dialog, IconButton, Portal, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // NOTE: Auth screens are intentionally English-only (not localized).
@@ -14,6 +14,7 @@ type ForgotPasswordForm = {
 };
 
 export default function ForgotPasswordScreen() {
+  const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { sendRecovery, error: authError, clearError } = useAuth();
   const [sent, setSent] = useState(false);
@@ -26,11 +27,16 @@ export default function ForgotPasswordScreen() {
   });
 
   return (
-    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView style={[styles.screen, { width: windowWidth }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom + 24, 24) },
+          {
+            width: windowWidth,
+            paddingTop: insets.top + 8,
+            paddingBottom: Math.max(insets.bottom + 24, 24),
+          },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -113,8 +119,6 @@ export default function ForgotPasswordScreen() {
             </Text>
           ) : null}
 
-          {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
-
           <Pressable style={styles.backLink} onPress={() => router.replace('/login')}>
             <MaterialIcons name="chevron-left" size={18} color="rgba(255,255,255,0.5)" />
             <Text style={styles.backText}>Back to Sign In</Text>
@@ -123,6 +127,24 @@ export default function ForgotPasswordScreen() {
       </ScrollView>
 
       <View style={styles.bottomGlow} pointerEvents="none" />
+
+      <Portal>
+        <Dialog
+          visible={Boolean(authError)}
+          onDismiss={clearError}
+          style={styles.errorDialog}
+        >
+          <Dialog.Title style={styles.errorDialogTitle}>Request failed</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.errorDialogMessage}>{authError ?? ''}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button textColor="#f42525" onPress={clearError}>
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </KeyboardAvoidingView>
   );
 }
@@ -130,10 +152,16 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    alignSelf: 'stretch',
     backgroundColor: '#0a0a0a',
+  },
+  scrollView: {
+    flex: 1,
+    alignSelf: 'stretch',
   },
   scrollContent: {
     flexGrow: 1,
+    alignSelf: 'stretch',
   },
   header: {
     paddingHorizontal: 16,
@@ -192,6 +220,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
     marginTop: 8,
+  },
+  errorDialog: {
+    backgroundColor: '#1e1e1e',
+  },
+  errorDialogTitle: {
+    color: '#fff',
+    fontFamily: 'Lexend_700Bold',
+  },
+  errorDialogMessage: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
   },
   successText: {
     marginTop: 12,

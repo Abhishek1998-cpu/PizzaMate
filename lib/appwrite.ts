@@ -72,3 +72,32 @@ export function getWebRedirectBaseUrl() {
   return cfg.webRedirectBaseUrl;
 }
 
+/**
+ * Dev-only: check if the Appwrite host is reachable from the app.
+ * Call from login screen (or similar) and check Metro logs for the result.
+ * Helps debug "Network request failed" when the device browser has internet.
+ */
+export async function checkAppwriteConnectivity(): Promise<{ ok: boolean; endpoint: string; error?: string }> {
+  const endpoint = cfg.endpoint;
+  const healthUrl = `${endpoint.replace(/\/$/, '')}/health/version`;
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log('[PizzaMate] Appwrite endpoint:', endpoint);
+  }
+  try {
+    const res = await fetch(healthUrl, { method: 'GET' });
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log('[PizzaMate] Appwrite health check:', res.ok ? 'OK' : `HTTP ${res.status}`);
+    }
+    return { ok: res.ok, endpoint };
+  } catch (e) {
+    const errMsg = e instanceof Error ? e.message : String(e);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.warn('[PizzaMate] Appwrite health check failed:', errMsg);
+    }
+    return { ok: false, endpoint, error: errMsg };
+  }
+}
+

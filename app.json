@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pizzamate"
+      "bundleIdentifier": "com.pizzamate",
+      "requireFullScreen": true
     },
     "android": {
       "package": "com.pizzamate",
@@ -19,7 +20,8 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "resizeableActivity": true
     },
     "web": {
       "output": "static",
@@ -50,7 +52,11 @@
         "projectId": "69748622002fa8040371",
         "projectName": "pizza-mate"
       },
-      "webRedirectBaseUrl": "https://pizza-mate.vercel.app"
+      "webRedirectBaseUrl": "https://pizza-mate.vercel.app",
+      "router": {},
+      "eas": {
+        "projectId": "433d5ea8-a95e-47ee-81d8-a80fde1fd28c"
+      }
     }
   }
 }

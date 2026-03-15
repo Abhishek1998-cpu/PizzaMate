@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Button, Dialog, IconButton, Portal, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,6 +17,7 @@ type RegisterFormValues = {
 };
 
 export default function RegisterScreen() {
+  const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const { signUp, error: authError, clearError } = useAuth();
@@ -36,15 +37,20 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.screen}
+      style={[styles.screen, { width: windowWidth }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom + 24, 24) },
+          {
+            width: windowWidth,
+            paddingTop: insets.top + 8,
+            paddingBottom: Math.max(insets.bottom + 24, 24),
+          },
         ]}
+        style={styles.scrollView}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -189,8 +195,6 @@ export default function RegisterScreen() {
             Sign Up
           </Button>
 
-          {authError ? <Text style={styles.errorText}>{authError}</Text> : null}
-
           <Pressable onPress={() => router.replace("/login")}>
             <Text style={styles.loginText}>
               Already have an account?{" "}
@@ -214,6 +218,21 @@ export default function RegisterScreen() {
       />
 
       <Portal>
+        <Dialog
+          visible={Boolean(authError)}
+          onDismiss={clearError}
+          style={styles.errorDialog}
+        >
+          <Dialog.Title style={styles.errorDialogTitle}>Sign up failed</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.errorDialogMessage}>{authError ?? ""}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button textColor="#f42525" onPress={clearError}>
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
         <Dialog visible={verifyOpen} onDismiss={() => setVerifyOpen(false)} style={styles.dialog}>
           <Dialog.Title style={styles.dialogTitle}>Verify your email</Dialog.Title>
           <Dialog.Content>
@@ -242,10 +261,16 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    alignSelf: "stretch",
     backgroundColor: "#221010",
+  },
+  scrollView: {
+    flex: 1,
+    alignSelf: "stretch",
   },
   scrollContent: {
     flexGrow: 1,
+    alignSelf: "stretch",
   },
   header: {
     paddingHorizontal: 16,
@@ -370,6 +395,19 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 200,
+  },
+  errorDialog: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 14,
+  },
+  errorDialogTitle: {
+    color: "#fff",
+    fontFamily: "Lexend_700Bold",
+  },
+  errorDialogMessage: {
+    color: "rgba(255,255,255,0.85)",
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
   },
   dialog: {
     backgroundColor: "#1e1e1e",
