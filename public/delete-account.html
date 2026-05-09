@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PizzaMate - Data Deletion &amp; Privacy</title>
+    <meta
+      name="description"
+      content="Request deletion of your PizzaMate account and personal data."
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ec1313",
+              "background-light": "#f8f6f6",
+              "background-dark": "#121212",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              brand: ["Lexend", "Inter", "sans-serif"],
+            },
+            borderRadius: {
+              xl: "0.75rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: max(720px, 100dvh);
+      }
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(236, 19, 19, 0.3);
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased"
+  >
+    <header
+      class="sticky top-0 z-50 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5"
+    >
+      <div
+        class="flex items-center h-16 w-full px-6 md:px-10 lg:px-16 justify-between"
+      >
+        <a
+          href="./index.html"
+          class="flex items-center justify-center p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
+          aria-label="Back to PizzaMate"
+        >
+          <span class="material-symbols-outlined text-2xl">chevron_left</span>
+        </a>
+        <h2 class="text-lg font-bold tracking-tight flex-1 text-center pr-8">
+          Data Deletion &amp; Privacy
+        </h2>
+      </div>
+    </header>
+
+    <main class="w-full pb-16">
+      <section class="px-6 md:px-10 lg:px-16 pt-10">
+        <div class="max-w-3xl mx-auto text-center">
+          <div
+            class="mx-auto h-14 w-14 rounded-xl bg-primary/15 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-primary text-3xl"
+              >delete_forever</span
+            >
+          </div>
+          <h1
+            class="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight font-brand"
+          >
+            PizzaMate &mdash; Data Deletion &amp; Privacy
+          </h1>
+          <p
+            class="mt-3 text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium"
+          >
+            How to request the deletion of your account and personal data.
+          </p>
+        </div>
+      </section>
+
+      <section class="px-6 md:px-10 lg:px-16 mt-10">
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div
+            class="p-6 rounded-xl bg-white/70 dark:bg-white/5 border border-gray-200 dark:border-white/5"
+          >
+            <h2 class="text-xl font-extrabold tracking-tight">Your right to deletion</h2>
+            <p class="mt-3 text-base leading-relaxed text-gray-700 dark:text-gray-300">
+              You can request the permanent deletion of your PizzaMate account and the
+              personal data associated with it. The data we store on our servers
+              (Appwrite) and that will be removed includes:
+            </p>
+            <ul class="mt-4 space-y-3">
+              <li class="flex items-start gap-3">
+                <span
+                  class="material-symbols-outlined text-primary mt-0.5"
+                  aria-hidden="true"
+                  >alternate_email</span
+                >
+                <div>
+                  <p class="font-bold">Account credentials</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Your email address and authentication record.
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span
+                  class="material-symbols-outlined text-primary mt-0.5"
+                  aria-hidden="true"
+                  >badge</span
+                >
+                <div>
+                  <p class="font-bold">Profile information</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Your name, age, and gender.
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span
+                  class="material-symbols-outlined text-primary mt-0.5"
+                  aria-hidden="true"
+                  >photo_library</span
+                >
+                <div>
+                  <p class="font-bold">Media</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Profile photos stored in our cloud storage.
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div
+            class="p-6 rounded-xl bg-white/70 dark:bg-white/5 border border-gray-200 dark:border-white/5"
+          >
+            <h2 class="text-xl font-extrabold tracking-tight">
+              How to request deletion
+            </h2>
+            <p class="mt-3 text-base leading-relaxed text-gray-700 dark:text-gray-300">
+              In-app account deletion is being finalized. In the meantime, you can
+              request deletion manually by sending us an email.
+            </p>
+
+            <ol class="mt-5 space-y-4">
+              <li class="flex items-start gap-3">
+                <span
+                  class="flex-none h-7 w-7 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center"
+                  >1</span
+                >
+                <div class="flex-1">
+                  <p class="font-bold">Send an email from your registered address</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Email us from the email address linked to your PizzaMate
+                    account. Requests from any other address cannot be verified.
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span
+                  class="flex-none h-7 w-7 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center"
+                  >2</span
+                >
+                <div class="flex-1">
+                  <p class="font-bold">Use the subject line</p>
+                  <p
+                    class="mt-2 inline-block px-3 py-1.5 rounded-lg bg-primary/15 text-primary font-bold text-sm"
+                  >
+                    Data Deletion Request
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span
+                  class="flex-none h-7 w-7 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center"
+                  >3</span
+                >
+                <div class="flex-1">
+                  <p class="font-bold">Send to our support address</p>
+                  <a
+                    id="supportEmailLink"
+                    href="mailto:[abhishekverma998@gmail.com]?subject=Data%20Deletion%20Request"
+                    class="mt-2 inline-flex items-center gap-2 px-5 py-3 bg-primary text-white font-extrabold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                  >
+                    <span class="material-symbols-outlined">mail</span>
+                    <span id="supportEmailText">[abhishekverma998@gmail.com]</span>
+                  </a>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <div
+            class="p-6 rounded-xl bg-white/70 dark:bg-white/5 border border-gray-200 dark:border-white/5"
+          >
+            <h2 class="text-xl font-extrabold tracking-tight">Processing time</h2>
+            <p class="mt-3 text-base leading-relaxed text-gray-700 dark:text-gray-300">
+              We process verified data deletion requests within
+              <span class="font-bold text-primary">7 business days</span> of receipt.
+              You will receive a confirmation email once your account and data have
+              been removed from our systems.
+            </p>
+          </div>
+
+          <div
+            class="p-6 rounded-xl border border-primary/40 bg-primary/10 flex items-start gap-3"
+          >
+            <span
+              class="material-symbols-outlined text-primary mt-0.5"
+              aria-hidden="true"
+              >warning</span
+            >
+            <div>
+              <p class="font-extrabold">This action is permanent</p>
+              <p class="mt-2 text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                Once your data deletion request is processed, your account, profile
+                information, and uploaded photos cannot be recovered. You will need to
+                create a new account to use PizzaMate again.
+              </p>
+            </div>
+          </div>
+
+          <p class="text-xs text-center text-gray-500 dark:text-gray-500 pt-4">
+            For more details on what data we collect and how we use it, please review
+            our
+            <a
+              href="./privacy-policy.html"
+              class="text-primary font-bold hover:underline"
+              >Privacy Policy</a
+            >.
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
